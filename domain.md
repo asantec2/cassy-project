@@ -1,22 +1,29 @@
 ```mermaid
 classDiagram
+
 class Product{
-    <<RECORD>>
-    - string name 
-    - number price
-    - ProductType type
+    <<abstract>>
+    - const string name 
+    - const number price
+
+    + getName() string
+    + getPrice() number
+    
 }
 note for Product"
   name must not be empty
   price > 0
 
 "
-class ProductType{
-    <<ENUMERATION>>
-     SMOOTHIE,
-     JUICE
-    
+class Smoothie{
+
 }
+ class Juice{
+
+ }
+ Product --|> Smoothie
+ Product --|> Juice
+
 class CartItem{
     - Product product
     - number quantity
@@ -30,20 +37,32 @@ class Cart{
     - Array<CartItem> items
     + addProduct(Product product)void
     + getTotal() number
-    + generateReceipt() string
+    + checkOut() Receipt
 
 }
  class Store{
     - Array<Product> products
     + displayProducts() void
  }
+ 
  note for Store"
- products should not be empty
+ products should not be empty 
+ "
+ class Receipt{
+    - Array<CartItem> items
+    - number total
+    + getItems() Array<CartItem>
+    + getTotal() number
+
+ }
+ note for Receipt"
+ total > 0
+ items should have at least one CartItem
  "
 
- Product --* ProductType
  Store --* Product
  CartItem --o Product
  Cart --* CartItem
+ Receipt --o CartItem
 
 ```
