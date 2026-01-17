@@ -9,9 +9,9 @@ date: Winter 2026
 flowchart
 subgraph **View Product and add to cart**
 
-Start[[POS start screen]]--click view products--> ProductsDisplayed{Products View}
+Start[[View screen]]--click view products--> ProductsDisplayed{Products displayed}
 Start -.invalid click.-> Start
-ProductsDisplayed -.products displayed.->SelectProduct[select product]
+ProductsDisplayed -->SelectProduct[select product]
 SelectProduct --valid selection--> AddCart{add to cart}
 SelectProduct -.invalid selection .->ProductsDisplayed
 AddCart -.addition succesful.-> Done[[Product Added to cart]]
