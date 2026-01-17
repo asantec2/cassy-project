@@ -1,3 +1,11 @@
+---
+title: Domain model for my POS system at a Drink store 
+author: Cassandra Asante (asantec@myumanitoba.ca)
+date: Winter 2026
+---
+
+# Domain model
+
 ```mermaid
 classDiagram
 
