@@ -32,45 +32,32 @@ class Smoothie{
  Product --|> Smoothie
  Product --|> Juice
 
-class CartItem{
-    - Product product
-    - number quantity
-    + increaseQuantity(number amount) void
-    + getSubtotal() number
-}
-note for CartItem"
-quantity > 0
-"
+
 class Cart{
-    - Array<CartItem> items
+    - Array~Product~ items
     + addProduct(Product product)void
+    + removeProduct(Product product) void
+    + getItems() Array~Product~
     + getTotal() number
     + checkOut() Receipt
 
 }
- class Store{
-    - Array<Product> products
-    + displayProducts() void
- }
- 
- note for Store"
- products should not be empty 
- "
+
  class Receipt{
-    - Array<CartItem> items
+    - Array~Product~ items
     - number total
-    + getItems() Array<CartItem>
+    + getItems() Array~Product~
     + getTotal() number
 
  }
  note for Receipt"
  total > 0
- items should have at least one CartItem
+ items should have at least one Product
  "
 
- Store --* Product
- CartItem --o Product
- Cart --* CartItem
- Receipt --o CartItem
+ 
+ 
+ Cart --* Product
+ Receipt --o Product
 
 ```

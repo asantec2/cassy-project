@@ -10,10 +10,9 @@ flowchart
 subgraph **View Product and add to cart**
 
 Start[[View screen]]--click view products--> ProductsDisplayed{Products displayed}
-Start -.invalid click.-> Start
 ProductsDisplayed -->SelectProduct[select product]
-SelectProduct --valid selection--> AddCart{add to cart}
-SelectProduct -.invalid selection .->ProductsDisplayed
+SelectProduct --product in stock--> AddCart{add to cart}
+SelectProduct -.peoduct out of stock .->ProductsDisplayed
 AddCart -.addition succesful.-> Done[[Product Added to cart]]
 
 end
@@ -24,7 +23,9 @@ flowchart
 subgraph **Checkout with Receipt**
 CheckoutScreen[[checkout Screen]]--click checkout-->Checkout{check out}
 Checkout -.cart empty .->CheckoutScreen
-Checkout --valid cart-->Receipt[[Receipt generated]]
+Checkout --valid cart-->Payment{Process payment}
+Payment -. payment failed .-> CheckoutScreen
+Payment -- payment successful -->Receipt[[Receipt generated]]
 
 end
 ```
