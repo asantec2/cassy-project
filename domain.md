@@ -21,12 +21,11 @@ class Product{
 note for Product"
   name must not be empty
   price > 0
-
 "
-class Smoothie{
-
+class Smoothie{ 
+    
 }
- class Juice{
+class Juice{
 
  }
  Product --|> Smoothie

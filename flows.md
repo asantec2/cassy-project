@@ -12,8 +12,8 @@ subgraph **View Product and add to cart**
 Start[[View screen]]--click view products--> ProductsDisplayed{Products displayed}
 ProductsDisplayed -->SelectProduct[select product]
 SelectProduct --product in stock--> AddCart{add to cart}
-SelectProduct -.peoduct out of stock .->ProductsDisplayed
-AddCart -.addition succesful.-> Done[[Product Added to cart]]
+SelectProduct -.product out of stock .->ProductsDisplayed
+AddCart -.addition successful.-> Done[[Product Added to cart]]
 
 end
 
