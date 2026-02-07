@@ -1,3 +1,3 @@
-export default interface Listener{
-    notify() :void;
+export default interface Listener {
+    notify(): void;
 }

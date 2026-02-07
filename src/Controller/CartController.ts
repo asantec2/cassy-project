@@ -1,28 +1,33 @@
 import Cart from "../model/Cart.ts";
-import Smoothie from "../model/Smoothie.ts";
-import  CartView from "../View/CartView.ts";
-import type Product from "../model/Product.ts";
+import CartView from "../View/CartView.ts";
+import Product from "../model/Product.ts";
+import ReceiptView from "../View/ReceiptView.ts";
 
-export default class CartController{
-    #cart :Cart;
-    #cartView :CartView;
+export default class CartController {
+    #cart: Cart;
+    #cartView: CartView;
+
     constructor() {
         this.#cart = new Cart();
-        this.#cartView = new CartView(this.#cart,this);
+        this.#cartView = new CartView(this.#cart, this);
     }
-    addToCart(){
-        let product = new Smoothie("StrawberrySunshine",10);
+
+    addToCart(product: Product) {
         this.#cart.addProduct(product);
-        console.log("Product added to Cart")
-        console.log(this.#cart);
-    }
-    removeFromCart(product:Product){
-        this.#cart.removeProduct(product);
-        console.log("Product removed");
 
     }
-    checkOut(){
-        this.#cart.checkOut();
-        console.log("checked out successfully");
+
+    removeFromCart(product: Product) {
+        this.#cart.removeProduct(product);
+
+    }
+
+    checkOut() {
+        const receipt = this.#cart.checkOut();   // IMPORTANT: returns Receipt
+        new ReceiptView(receipt, this);
+    }
+
+    showCartView() {
+        this.#cartView = new CartView(this.#cart, this);
     }
 }

@@ -2,22 +2,25 @@ import Product from "./Product.ts";
 import Receipt from "./Receipt.ts";
 import type Listener from "./Listener.ts";
 
-export default class Cart{
+export default class Cart {
     #items: Array<Product>
-    #listeners :Array<Listener>;
+    #listeners: Array<Listener>;
 
     constructor() {
         this.#items = new Array<Product>();
         this.#listeners = new Array<Listener>();
     }
-    addProduct( product :Product){
+
+    addProduct(product: Product) {
         this.#items.push(product)
         this.#notifyAll();
 
     }
-    #notifyAll(){
-        this.#listeners.forEach((l) =>l.notify());
+
+    #notifyAll() {
+        this.#listeners.forEach((l) => l.notify());
     }
+
     removeProduct(product: Product): void {
         let index = -1;
 
@@ -37,8 +40,7 @@ export default class Cart{
     }
 
 
-
-    getTotal():number{
+    getTotal(): number {
         let total = 0;
 
         for (let i = 0; i < this.#items.length; i++) {
@@ -49,10 +51,12 @@ export default class Cart{
 
 
     }
-    getItems(){
+
+    getItems() {
         return this.#items;
 
     }
+
     checkOut(): Receipt {
 
         let total = this.getTotal();
@@ -61,12 +65,13 @@ export default class Cart{
             purchasedItems.push(this.#items[i]);
         }
 
-        let receipt = new Receipt(total,purchasedItems);
+        let receipt = new Receipt(total, purchasedItems);
         this.#items = new Array<Product>();
         this.#notifyAll();
         return receipt;
     }
-    registerListener(listener:Listener){
+
+    registerListener(listener: Listener) {
         this.#listeners.push(listener);
     }
 }
