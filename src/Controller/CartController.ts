@@ -5,6 +5,7 @@ import ReceiptView from "../View/ReceiptView.ts";
 
 export default class CartController {
     #cart: Cart;
+    // @ts-ignore
     #cartView: CartView;
 
     constructor() {
@@ -23,7 +24,7 @@ export default class CartController {
     }
 
     checkOut() {
-        const receipt = this.#cart.checkOut();   // IMPORTANT: returns Receipt
+        const receipt = this.#cart.checkOut();
         new ReceiptView(receipt, this);
     }
 

@@ -17,7 +17,7 @@ export default class ReceiptView{
             <img 
            src="/images/receipt.png" 
            alt="Receipt Image"
-           width="300"
+           width="400"
          />
 
          <ul></ul>

@@ -23,9 +23,7 @@ flowchart
 subgraph **Checkout with Receipt**
 CheckoutScreen[[checkout Screen]]--click checkout-->Checkout{check out}
 Checkout -.cart empty .->CheckoutScreen
-Checkout --valid cart-->Payment{Process payment}
-Payment -. payment failed .-> CheckoutScreen
-Payment -- payment successful -->Receipt[[Receipt generated]]
+Checkout --valid cart-->Receipt[[Receipt generated]]
 
 end
 ```

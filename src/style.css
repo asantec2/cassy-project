@@ -160,5 +160,26 @@ button:focus-visible {
     vertical-align: middle;
     border-collapse: collapse;
 }
+#error {
+    color: red;
+    font-weight: bold;
+    border: 2px solid red;
+    padding: 6px 10px;
+    white-space: nowrap;   /* stay on one line */
+    display: inline-block;
+}
+#error {
+    color: red;
+    font-weight: bold;
+    border: 2px solid red;
+    padding: 6px 10px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+#error:empty {
+    display: none;
+}
+
 
 

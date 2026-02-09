@@ -12,7 +12,13 @@ export default class Cart {
     }
 
     addProduct(product: Product) {
-        this.#items.push(product)
+        if(product.getQuantity() > 0){
+            this.#items.push(product);
+            product.reduceQuantity();
+        }else{
+          throw new InvalidProductAdditionException();
+        }
+
         this.#notifyAll();
 
     }
@@ -28,12 +34,16 @@ export default class Cart {
             if (index === -1) {
                 if (this.#items[i].getName() === product.getName()) {
                     index = i;
+
                 }
             }
         }
 
         if (index !== -1) {
             this.#items.splice(index, 1);
+            product.increaseQuantity();
+        }else{
+            throw new InvalidProductRemovalException();
         }
 
         this.#notifyAll();
@@ -59,6 +69,9 @@ export default class Cart {
 
     checkOut(): Receipt {
 
+        if(this.#items.length === 0){
+            throw new InvalidCartCheckoutException();
+        }
         let total = this.getTotal();
         let purchasedItems = new Array<Product>();
         for (let i = 0; i < this.#items.length; i++) {
@@ -75,3 +88,6 @@ export default class Cart {
         this.#listeners.push(listener);
     }
 }
+export class InvalidProductAdditionException extends Error { }
+export class InvalidProductRemovalException extends Error { }
+export class InvalidCartCheckoutException extends Error { }

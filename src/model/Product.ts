@@ -23,4 +23,9 @@ export default abstract class Product {
         return this.#name;
     }
 
+    abstract getQuantity(): number;
+    abstract reduceQuantity(): void;
+    abstract increaseQuantity(): void;
+
+
 }

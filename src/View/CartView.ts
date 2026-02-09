@@ -2,10 +2,15 @@ import Cart from "../model/Cart.ts";
 import CartController from "../Controller/CartController.ts";
 import Smoothie from "../model/Smoothie.ts";
 import Juice from "../model/Juice.ts";
+
+import {InvalidCartCheckoutException} from "../model/Cart.ts";
+import {InvalidProductAdditionException} from "../model/Cart.ts";
+import {InvalidProductRemovalException} from "../model/Cart.ts";
 export default class CartView{
     #cart :Cart;
     #teamEl : HTMLUListElement;
     #cartController : CartController;
+    #errorEl: HTMLSpanElement
 
     constructor(cart :Cart, cartController :CartController) {
         this.#cart = cart;
@@ -14,13 +19,14 @@ export default class CartView{
 
 
         document.querySelector("#app")!.innerHTML = `
-        <div id="cart"
+        <div id="cart">
+           
             <h2>Available Drinks</h2>
 
             <div id="drink-images" style="display: flex; gap: 40px;">
 
                 <div class="drink">
-                    <img src="/images/smothie.png" alt="Smoothie" width="300">
+                    <img src="/images/smothie.png" alt="Smoothie" width="400">
                     <p>Smoothie</p>
                     
                     <strong>Strawberry Sunshine</strong>
@@ -30,7 +36,7 @@ export default class CartView{
                 </div>
 
                 <div class="drink">
-                    <img src="/images/juice.png" alt="Juice" width="300">
+                    <img src="/images/juice.png" alt="Juice" width="400">
                     <p>Juice</p>
                     
                     <strong/> Orange Juice </strong>
@@ -43,17 +49,23 @@ export default class CartView{
 
             <h3>Cart</h3>
             <ul></ul>
-
+            
+        <span id="error"></span><br />
+        <p></p>
             <button id="check-out">Check out</button>
         </div>
         `
-        this.#teamEl = document.querySelector("#cart > ul")!;
 
-        document.querySelector("#add-smoothie")!.addEventListener("click",() => this.#cartController.addToCart(new Smoothie("Strawberry Sunshine",10)));
-        document.querySelector("#remove-smoothie")!.addEventListener("click",()=> this.#cartController.removeFromCart(new Smoothie("Strawberry Sunshine",10)));
-        document.querySelector("#add-juice")!.addEventListener("click",() => this.#cartController.addToCart(new Juice("Orange Juice",15)));
-        document.querySelector("#remove-juice")!.addEventListener("click",()=> this.#cartController.removeFromCart(new Juice("Orange Juice",15)));
-        document.querySelector("#check-out")!.addEventListener("click",() => this.#cartController.checkOut());
+
+        this.#teamEl = document.querySelector("#cart > ul")!;
+        this.#errorEl = document.querySelector("#error")! as HTMLSpanElement;
+
+
+        document.querySelector("#add-smoothie")!.addEventListener("click",() => this.#addSmoothie());
+        document.querySelector("#remove-smoothie")!.addEventListener("click",()=> this.#removeSmoothie());
+        document.querySelector("#add-juice")!.addEventListener("click",() => this.#addJuice());
+        document.querySelector("#remove-juice")!.addEventListener("click",()=> this.#removeJuice());
+        document.querySelector("#check-out")!.addEventListener("click",() => this.#checkOut());
 
     }
     notify(){
@@ -82,5 +94,78 @@ export default class CartView{
         this.#teamEl.appendChild(totalEl);
 
     }
+
+
+
+    #addSmoothie() {
+
+        try {
+            this.#cartController.addToCart(new Smoothie("Strawberry Sunshine", 10));
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidProductAdditionException) {
+                this.#errorEl.textContent = "Strawberry Sunshine is unavailable at this time. Try again next time.";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
+    #removeSmoothie() {
+
+        try {
+            this.#cartController.removeFromCart(new Smoothie("Strawberry Sunshine", 10));
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidProductRemovalException) {
+                this.#errorEl.textContent = "Strawberry Sunshine has not been added to cart!";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
+    #addJuice() {
+        try {
+            this.#cartController.addToCart(new Juice("Orange Juice", 15));
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidProductAdditionException) {
+                this.#errorEl.textContent = "Orange Juice is unavailable at this time.Try again next time.";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
+    #removeJuice() {
+
+        try {
+            this.#cartController.removeFromCart(new Juice("Orange Juice", 15));
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidProductRemovalException) {
+                this.#errorEl.textContent = "Orange Juice has not been added to cart yet!";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
+    #checkOut() {
+
+        try {
+            this.#cartController.checkOut()
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidCartCheckoutException) {
+                this.#errorEl.textContent = "Cart is empty. Add items before checking out.";
+
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
 
 }
