@@ -1,5 +1,5 @@
 ---
-title: Domain model for my POS system at a Drink store 
+title: Domain model for my Booster Juice POS system . 
 author: Cassandra Asante (asantec@myumanitoba.ca)
 date: Winter 2026
 ---
@@ -16,6 +16,9 @@ class Product{
 
     + getName() string
     + getPrice() number
+    + getQuantity() number
+    + reduceQuantity() void
+    + increaseQuantity() void
     
 }
 note for Product"
@@ -24,9 +27,16 @@ note for Product"
 "
 class Smoothie{ 
     
+    + getQuantity() number
+    + reduceQuantity() void
+    + increaseQuantity() void
 }
-class Juice{
 
+class Juice{
+  
+    + getQuantity() number
+    + reduceQuantity() void
+    + increaseQuantity() void
  }
  Product --|> Smoothie
  Product --|> Juice
@@ -34,11 +44,14 @@ class Juice{
 
 class Cart{
     - Array~Product~ items
+    - Array~Listeners~ items
+    - notifyAll() void
     + addProduct(Product product)void
     + removeProduct(Product product) void
     + getItems() Array~Product~
     + getTotal() number
     + checkOut() Receipt
+    + registerListener(Listener listener) void
 
 }
 

@@ -6,6 +6,7 @@ export default class Smoothie extends Product {
         super(name, price);
     }
 
+
     getQuantity(): number {
         return Smoothie.#stock;
     }
