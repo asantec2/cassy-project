@@ -6,6 +6,7 @@ export default class ReceiptView{
     #cartController :CartController;
     #itemsEl: HTMLUListElement;
 
+    //constructor
     constructor(receipt:Receipt,cartController : CartController) {
         this.#receipt = receipt;
         this.#cartController = cartController;
@@ -41,6 +42,10 @@ export default class ReceiptView{
         this.#showItems();
     }
 
+    /**
+     * Renders all purchased items on the receipt.
+     * Clears the current list and rebuilds it from the receipt data.
+     */
     #showItems(): void {
         this.#itemsEl.replaceChildren();
 

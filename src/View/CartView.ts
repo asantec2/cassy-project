@@ -1,7 +1,11 @@
+/**
+ * The {@code CartView} class represents the user interface for the shopping cart.
+ * It displays available products and cart contents, forwards user actions to
+ * {@link CartController}, and updates when notified by the {@link Cart} model.
+ */
+
 import Cart from "../model/Cart.ts";
 import CartController from "../Controller/CartController.ts";
-import Smoothie from "../model/Smoothie.ts";
-import Juice from "../model/Juice.ts";
 
 import {InvalidCartCheckoutException} from "../model/Cart.ts";
 import {InvalidProductAdditionException} from "../model/Cart.ts";
@@ -12,6 +16,7 @@ export default class CartView{
     #cartController : CartController;
     #errorEl: HTMLSpanElement
 
+    //constructor
     constructor(cart :Cart, cartController :CartController) {
         this.#cart = cart;
         this.#cartController = cartController;
@@ -68,7 +73,11 @@ export default class CartView{
         document.querySelector("#check-out")!.addEventListener("click",() => this.#checkOut());
 
     }
-    notify(){
+    /**
+     * Updates the cart display when the model changes.
+     * Re-renders all cart items and the total price.
+     */
+        notify(){
         this.#teamEl.replaceChildren();
         this.#cart.getItems().forEach((p)=>{
             let cartEl = document.createElement("li");
@@ -95,12 +104,14 @@ export default class CartView{
 
     }
 
-
-
+    /**
+     * Requests the controller to add a Smoothie to the cart.
+     * Displays an error message if the product is unavailable.
+     */
     #addSmoothie() {
 
         try {
-            this.#cartController.addToCart(new Smoothie("Strawberry Sunshine", 10));
+            this.#cartController.addSmoothie();
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductAdditionException) {
@@ -111,10 +122,14 @@ export default class CartView{
         }
     }
 
+    /**
+     * Requests the controller to remove a Smoothie from the cart.
+     * Displays an error message if the product is not in the cart.
+     */
     #removeSmoothie() {
 
         try {
-            this.#cartController.removeFromCart(new Smoothie("Strawberry Sunshine", 10));
+            this.#cartController.removeSmoothie();
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
@@ -125,9 +140,13 @@ export default class CartView{
         }
     }
 
+    /**
+     * Requests the controller to add a Juice to the cart.
+     * Displays an error message if the product is unavailable.
+     */
     #addJuice() {
         try {
-            this.#cartController.addToCart(new Juice("Orange Juice", 15));
+            this.#cartController.addJuice();
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductAdditionException) {
@@ -138,10 +157,14 @@ export default class CartView{
         }
     }
 
+    /**
+     * Requests the controller to remove a Juice from the cart.
+     * Displays an error message if the product is not in the cart.
+     */
     #removeJuice() {
 
         try {
-            this.#cartController.removeFromCart(new Juice("Orange Juice", 15));
+            this.#cartController.removeJuice();
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
@@ -152,6 +175,10 @@ export default class CartView{
         }
     }
 
+    /**
+     * Requests the controller to complete checkout.
+     * Displays an error message if the cart is empty.
+     */
     #checkOut() {
 
         try {
