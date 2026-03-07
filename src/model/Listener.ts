@@ -3,7 +3,6 @@
  * when the state of an object changes.
  */
 
-
 export default interface Listener {
     notify(): void;
 }

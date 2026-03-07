@@ -180,6 +180,15 @@ button:focus-visible {
 #error:empty {
     display: none;
 }
+html, body {
+    margin: 0;
+    background: white;
+}
 
+pglite-repl {
+    display: block;
+    width: 100%;
+    height: 300px;
+}
 
 
