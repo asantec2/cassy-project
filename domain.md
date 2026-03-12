@@ -54,7 +54,7 @@ class Cart{
     - Array~Product~ items
     - Array~Listeners~ listeners
     - Array~Coupon~ coupons
-    -~ number cartNumber
+    -~ number cart_id
     - number total
     - notifyAll() void
     + addProduct(Product product)void
@@ -131,7 +131,7 @@ note for Cashier"
  
  Cart "1" o--* "*" Product
  Receipt "1" o--o "1" Cart
- Cashier "1" o--o "*" Cart
+ Cashier "1" o--o "1" Cart
  Cashier "1" o--o "*" Receipt
  Cart "1" o--o "*" Coupon
 

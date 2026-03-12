@@ -1,46 +1,47 @@
-create table if not exists Cashier(
+create table if not exists cashier(
     username varchar(255) not null unique,
     password varchar(255) not null unique
 );
-create table if not exists Cart(
-    cart_number serial not null unique,
+create table if not exists cart(
+    cart_id serial not null unique,
     cashier varchar(255) not null,
-    foreign key (cashier) references Cashier(password)
+    foreign key (cashier) references cashier(username)
     on delete cascade
 );
-create table if not exists Product(
+create table if not exists product(
+    quantity integer not null,
     name varchar(255) not null unique,
-    price integer not null,
-    quantity integer not null
+    price integer not null
+
 );
-create table if not exists Coupon(
+create table if not exists coupon(
      name varchar(255) not null unique,
-    description varchar(255) unique
+     description varchar(255) unique
 );
-create table if not exists Receipt(
+create table if not exists receipt(
     timeStamp timeStamp not null,
     cart integer not null unique,
     cashier varchar(255) not null,
-    foreign key (cashier) references Cashier(password)
+    foreign key (cashier) references cashier(username)
     on delete cascade,
-    foreign key (cart) references Cart(cart_number)
+    foreign key (cart) references cart(cart_id)
     on delete cascade
     );
-create table if not exists CartItem(
+create table if not exists cartItem(
     product_name varchar(255) not null,
-    cart_number integer not null,
+    cart_id integer not null,
     quantity integer not null,
     current_total integer not null,
-    foreign key (product_name) references Product(name)
+    foreign key (product_name) references product(name)
     on delete cascade,
-    foreign key (cart_id) references Cart(cart_number)
+    foreign key (cart_id) references cart(cart_id)
     on delete cascade
     );
-create table if not exists CartCoupon(
+create table if not exists cartCoupon(
     coupon varchar(255) not null,
-    cart_number integer not null,
-    foreign key (coupon) references Coupon(name)
+    cart_id integer not null,
+    foreign key (coupon) references coupon(name)
     on delete cascade,
-    foreign key (cart_id) references Cart(cart_id)
+    foreign key (cart_id) references cart(cart_id)
     on delete cascade
     );
