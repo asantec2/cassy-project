@@ -55,6 +55,7 @@ class Cart{
     - Array~Listeners~ listeners
     - Array~Coupon~ coupons
     -~ number cart_id
+    - Cashier cashier
     - number total
     - notifyAll() void
     + addProduct(Product product)void
