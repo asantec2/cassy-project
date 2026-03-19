@@ -4,8 +4,9 @@
  * {@link CartController}, and updates when notified by the {@link Cart} model.
  */
 
-import Cart from "../model/Cart.ts";
+import Cart, {InvalidCouponAdditionException, InvalidCouponRemovalException} from "../model/Cart.ts";
 import CartController from "../Controller/CartController.ts";
+
 
 import {InvalidCartCheckoutException} from "../model/Cart.ts";
 import {InvalidProductAdditionException} from "../model/Cart.ts";
@@ -14,7 +15,9 @@ export default class CartView{
     #cart :Cart;
     #teamEl : HTMLUListElement;
     #cartController : CartController;
-    #errorEl: HTMLSpanElement
+    #errorEl: HTMLSpanElement;
+    #addFroyoDialog: HTMLDialogElement;
+    #removeFroyoDialog: HTMLDialogElement;
 
     //constructor
     constructor(cart :Cart, cartController :CartController) {
@@ -50,16 +53,68 @@ export default class CartView{
                     <button id="remove-juice">Remove Juice</button>
                 </div>
 
+
+                <div class="drink">
+                    <img src="/images/froyo.png" alt="Juice" width="400">
+                    <p>Frozen Yogurt</p>
+                    
+                    <strong/>Vanilla Froyo</strong>
+                    <p></p>
+                    <button id="show-add-froyo">Add Froyo</button>
+                    <button id="show-remove-froyo">Remove Froyo</button>   
+                </div>
             </div>
 
             <h3>Cart</h3>
             <ul></ul>
             
         <span id="error"></span><br />
+        <div class="coupon-section">
+      <h3>Coupons</h3>
+
+       <div class="coupon">
+        <strong>BOGO</strong>
+        <p>Buy one drink, get one free.</p>
+        <button id="add-bogo">Add BOGO</button>
+        <button id="remove-bogo">Remove BOGO</button>
+       </div>
+
+      <div class="coupon">
+        <strong>25% OFF</strong>
+        <p>Get 25% off your total purchase.</p>
+        <button id="add-percent">Add 25% OFF</button>
+        <button id="remove-percent">Remove 25% OFF</button>
+      </div>
+     </div>
         <p></p>
             <button id="check-out">Check out</button>
         </div>
         `
+
+        this.#addFroyoDialog = document.createElement("dialog");
+        this.#addFroyoDialog.id = "add-froyo-dialog";
+        this.#addFroyoDialog.innerHTML = `
+                    <span id="add-froyo-error"></span><br />
+                    <label for="add-froyo-amount">Froyo amount</label>
+                    <input type="number" id="add-froyo-amount" />
+                    <button id="add-froyo">Add Froyo</button>`;
+
+        this.#addFroyoDialog.querySelector("button")!
+            .addEventListener("click", () => this.#addFroyo());
+        document.body.appendChild(this.#addFroyoDialog);
+
+
+        this.#removeFroyoDialog = document.createElement("dialog");
+        this.#removeFroyoDialog.id = "remove-froyo-dialog";
+        this.#removeFroyoDialog.innerHTML = `
+            <span id="remove-froyo-error"></span><br />
+            <label for="remove-froyo-amount">Froyo amount</label>
+            <input type="number" id="remove-froyo-amount" />
+            <button id="remove-froyo">Remove Froyo</button>
+        `;
+        this.#removeFroyoDialog.querySelector("button")!
+            .addEventListener("click", () => this.#removeFroyo());
+        document.body.appendChild(this.#removeFroyoDialog);
 
 
         this.#teamEl = document.querySelector("#cart > ul")!;
@@ -71,7 +126,12 @@ export default class CartView{
         document.querySelector("#add-juice")!.addEventListener("click",() => this.#addJuice());
         document.querySelector("#remove-juice")!.addEventListener("click",()=> this.#removeJuice());
         document.querySelector("#check-out")!.addEventListener("click",() => this.#checkOut());
-
+        document.querySelector("#show-add-froyo")!.addEventListener("click", () => this.#addFroyoDialog.show());
+        document.querySelector("#show-remove-froyo")!.addEventListener("click", () => this.#removeFroyoDialog.show());
+        document.querySelector("#add-bogo")!.addEventListener("click", () => this.#addBOGO());
+        document.querySelector("#remove-bogo")!.addEventListener("click", () => this.#removeBOGO());
+        document.querySelector("#add-percent")!.addEventListener("click", () => this.#addPercent25());
+        document.querySelector("#remove-percent")!.addEventListener("click", () => this.#removePercent25());
     }
     /**
      * Updates the cart display when the model changes.
@@ -116,6 +176,52 @@ export default class CartView{
         } catch (e: any) {
             if (e instanceof InvalidProductAdditionException) {
                 this.#errorEl.textContent = "Strawberry Sunshine is unavailable at this time. Try again next time.";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+    #addFroyo(){
+        const amount = this.#addFroyoDialog
+            .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;
+
+        try {
+            this.#cartController.addFroyo(amount);
+            this.#addFroyoDialog.querySelector("#add-froyo-error")!.textContent = "";
+            this.#addFroyoDialog.querySelector("input[type='number']")!
+                .setAttribute("style", "border-color:;");
+            this.#errorEl.textContent = "";
+            this.#addFroyoDialog.close();
+        } catch (e: any) {
+            if (e instanceof InvalidProductAdditionException) {
+                this.#addFroyoDialog.querySelector("input[type='number']")!
+                    .setAttribute("style", "border-color:red;");
+                this.#addFroyoDialog.querySelector("#add-froyo-error")!
+                    .textContent = "Invalid Froyo amount or Vanilla Froyo is unavailable.";
+                this.#errorEl.textContent = "Vanilla froyo is unavailable at this time. Try again next time.";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+    #removeFroyo(){
+        const amount = this.#removeFroyoDialog
+            .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;
+
+        try {
+            this.#cartController.removeFroyo(amount);
+            this.#removeFroyoDialog.querySelector("#remove-froyo-error")!.textContent = "";
+            this.#removeFroyoDialog.querySelector("input[type='number']")!
+                .setAttribute("style", "border-color:;");
+            this.#errorEl.textContent = "";
+            this.#removeFroyoDialog.close();
+        } catch (e: any) {
+            if (e instanceof InvalidProductRemovalException) {
+                this.#removeFroyoDialog.querySelector("input[type='number']")!
+                    .setAttribute("style", "border-color:red;");
+                this.#removeFroyoDialog.querySelector("#remove-froyo-error")!
+                    .textContent = "Invalid Froyo amount or not enough Froyo in cart.";
+                this.#errorEl.textContent = "Vanilla froyo has not been added to cart!";
             } else {
                 console.log("unexpected error " + e);
             }
@@ -188,6 +294,57 @@ export default class CartView{
             if (e instanceof InvalidCartCheckoutException) {
                 this.#errorEl.textContent = "Cart is empty. Add items before checking out.";
 
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+    #addBOGO() {
+        try {
+            this.#cartController.addBOGO();
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidCouponAdditionException) {
+                this.#errorEl.textContent = "BOGO has already been added to the cart!";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
+    #removeBOGO() {
+        try {
+            this.#cartController.removeBOGO();
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidCouponRemovalException) {
+                this.#errorEl.textContent = "BOGO has not been added to the cart!";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
+    #addPercent25() {
+        try {
+            this.#cartController.addPercent25();
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidCouponAdditionException) {
+                this.#errorEl.textContent = "25% OFF coupon has already been added to the cart!";
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
+
+    #removePercent25() {
+        try {
+            this.#cartController.removePercent25();
+            this.#errorEl.textContent = "";
+        } catch (e: any) {
+            if (e instanceof InvalidCouponRemovalException) {
+                this.#errorEl.textContent = "25% OFF coupon has not been added to the cart!";
             } else {
                 console.log("unexpected error " + e);
             }

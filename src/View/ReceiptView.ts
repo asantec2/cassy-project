@@ -23,7 +23,7 @@ export default class ReceiptView{
                 <table class="cart-table">
                     <tr>
                         <td class="item-name"><strong>Total</strong></td>
-                        <td class="item-price"><strong>$${this.#receipt.getTotal()}.00</strong></td>
+                        <td class="item-price"><strong>$${this.#receipt.getCart().getTotal()}.00</strong></td>
                     </tr>
                 </table>
          </div>
@@ -49,7 +49,7 @@ export default class ReceiptView{
     #showItems(): void {
         this.#itemsEl.replaceChildren();
 
-        this.#receipt.getItems().forEach((p) => {
+        this.#receipt.getCart().getItems().forEach((p) => {
             const li = document.createElement("li");
             li.innerHTML = `
                 <table class="cart-table">

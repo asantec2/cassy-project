@@ -4,9 +4,7 @@ create table if not exists cashier(
 );
 create table if not exists cart(
     cart_id serial not null unique,
-    cashier varchar(255) not null,
-    foreign key (cashier) references cashier(username)
-    on delete cascade
+    total integer not null
 );
 create table if not exists product(
     quantity integer not null,
@@ -19,7 +17,7 @@ create table if not exists coupon(
      description varchar(255) unique
 );
 create table if not exists receipt(
-    timeStamp timeStamp not null,
+    timeStamp timestamp not null,
     cart integer not null unique,
     cashier varchar(255) not null,
     foreign key (cashier) references cashier(username)

@@ -17,6 +17,7 @@ class Product{
 
     + getName() string
     + getPrice() number
+    + setPrice( number newPrice) void
     + getQuantity() number
     + reduceQuantity() void
     + increaseQuantity() void
@@ -24,21 +25,15 @@ class Product{
 }
 note for Product"
   name must not be empty
-  price > 0
-  quantity > 0
+  price >= 0
+  quantity >= 0
 "
 class Smoothie{ 
     
-    + getQuantity() number
-    + reduceQuantity() void
-    + increaseQuantity() void
 }
 
 class Juice{
   
-    + getQuantity() number
-    + reduceQuantity() void
-    + increaseQuantity() void
  }
  Product --|> Smoothie
  Product --|> Juice
@@ -46,28 +41,26 @@ class Juice{
 
 class FrozenYogurt{
     
-    + getQuantity() number
-    + reduceQuantity() void
-    + increaseQuantity() void
 }
 class Cart{
     - Array~Product~ items
     - Array~Listeners~ listeners
     - Array~Coupon~ coupons
     -~ number cart_id
-    - Cashier cashier
     - number total
     - notifyAll() void
+    + setTotal(number newTotal) void
     + addProduct(Product product)void
     + removeProduct(Product product) void
     + getItems() Array~Product~
     + getTotal() number
+    + getCashier() Cashier
     + checkOut() Receipt
     + addCoupon() void
     + registerListener(Listener listener) void
 }
 note for Cart"
-total > 0
+total >= 0
 "
 class  Coupon{
     <<interface>>
@@ -99,11 +92,12 @@ class 25Percent{
  
 class Cashier{
     -~string username 
-    -~string password
+    -~string password 
     -~Array~Receipt~ receipts
     -~Cart cart
     
     +getReceipts() Array~Receipt~
+    +addReceipt(Receipt receipt) void
     +getName() string
     +getReceipt() string
     +getCart() Cart
@@ -115,7 +109,7 @@ note for Cashier"
 
 
  class Receipt{
-    -~Cart prchasedCart
+    -~Cart purchasedCart
     -~Cashier cashier
     -~Temporal timeStamp
     
