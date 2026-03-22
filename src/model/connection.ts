@@ -1,6 +1,14 @@
-import {PGlite} from "@electric-sql/pglite";
+import { PGlite } from "@electric-sql/pglite";
+import ddl from "../../create-tables.sql?raw";
 
-const pgLiteDb = await PGlite.create('idb://cassy-project');
-export default function db(){
-    return  pgLiteDb;
+let src = import.meta.env.VITE_DATABASE_URL;
+
+const pgLiteDb = await PGlite.create(src);
+
+if (src === "memory://") {
+    await pgLiteDb.exec(ddl);
+}
+
+export default function db() {
+    return pgLiteDb;
 }

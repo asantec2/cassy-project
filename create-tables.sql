@@ -4,7 +4,10 @@ create table if not exists cashier(
 );
 create table if not exists cart(
     cart_id serial not null unique,
-    total integer not null
+    total integer not null,
+    cashier varchar(255) not null unique,
+    foreign key (cashier)references cashier(username)
+    on delete cascade
 );
 create table if not exists product(
     quantity integer not null,
@@ -43,3 +46,6 @@ create table if not exists cartCoupon(
     foreign key (cart_id) references cart(cart_id)
     on delete cascade
     );
+insert into product(quantity, name, price) values(10, 'Orange Juice', 5),
+(10, 'Strawberry Sunshine', 6),(30, 'Vanilla Froyo', 6)
+    on conflict (name) do nothing;

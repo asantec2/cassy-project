@@ -1,6 +1,6 @@
 /**
  * The {@code Cart} class represents the logic of a shopping cart.
- * It manages a collection of {@link Product} objects, registered {@link Listener}s,
+ * It manages a collection of {@link Product} objects,{@link Coupon}object,and registered {@link Listener}s,
  * and supports checkout through the creation of a {@link Receipt}.
  */
 import Product from "./Product.ts";
@@ -9,9 +9,12 @@ import type Listener from "./Listener.ts";
 import db from './connection.ts'
 import type Coupon from "./Coupon.ts";
 import {assert} from "../assertions.ts";
-import  Cashier from "./Cashier.ts";
+import Cashier from "./Cashier.ts";
 import BOGO from "./BOGO.ts";
 import Percent25 from "./Percent25.ts";
+import Smoothie from "./Smoothie.ts";
+import Juice from "./Juice.ts";
+import FrozenYogurt from "./FrozenYogurt.ts";
 
 
 export default class Cart {
@@ -20,31 +23,30 @@ export default class Cart {
     #coupons: Array<Coupon>;
     #quantities: Array<number>;
     #total: number;
-    cart_id?:number;
+    cart_id?: number;
 
     //constructor
     constructor(cartId?: number) {
         this.#items = new Array<Product>();
         this.#listeners = new Array<Listener>();
         this.#coupons = new Array<Coupon>();
-        this.#quantities =new Array<number>();
+        this.#quantities = new Array<number>();
         this.#total = 0;
         this.cart_id = cartId;
         this.#checkCart();
     }
+
+    //implementation of class invariants
     #checkCart() {
         assert(this.#total >= 0, "total must be greater than 0");
     }
+
     /**
      * Add product to a list of products in the cart
      * @param product the product to be added to the cart
-     * @param amount
+     * @param amount the number of the product to be added
      */
-    addProduct(product: Product, amount:number) {
-
-        if (product.getQuantity() < amount) {
-            throw new InvalidProductAdditionException();
-        }
+    addProduct(product: Product, amount: number) {
         let index = -1;
 
         for (let i = 0; i < this.#items.length; i++) {
@@ -52,73 +54,131 @@ export default class Cart {
                 index = i;
             }
         }
+
+        let currentInCart = 0;
+
+        if (index !== -1) {
+            currentInCart = this.#quantities[index];
+        }
+
+        if (amount <= 0 || product.getQuantity() < currentInCart + amount) {
+            throw new InvalidProductAdditionException();
+        }
+
         if (index === -1) {
             this.#items.push(product);
             this.#quantities.push(amount);
         } else {
+            this.#items[index] = product;
             this.#quantities[index] = this.#quantities[index] + amount;
         }
+
+        this.calculateTotal();
         this.#notifyAll();
     }
 
-    getCoupons(){
+
+    getCoupons() {
         return this.#coupons;
     }
-    loadProduct(product:Product){
+
+    /**
+     * load products back into cart
+     * @param product the product to be added back
+     * @param quantity the quantity of product to be added
+     */
+    loadProduct(product: Product, quantity: number) {
         this.#items.push(product);
+        this.#quantities.push(quantity);
     }
-    loadCoupon(coupon:Coupon){
+
+    /**
+     * load coupon back into cart
+     * @param coupon the coupon to be added back
+     */
+    loadCoupon(coupon: Coupon) {
         this.#coupons.push(coupon);
     }
 
-    getCartId(){
+    getCartId() {
         return this.cart_id;
     }
-    setCartId(cartId : number){
+
+    setCartId(cartId: number) {
         this.cart_id = cartId;
     }
-    setTotal(newTotal:number){
+
+    setTotal(newTotal: number) {
         this.#total = newTotal;
     }
-    static async saveCart(cart:Cart) :Promise<Cart>{
-        const result = await db().query<{
-            cart_id:number
 
-        }>("insert  into cart(total) values ($1) returning cart_id",[cart.getTotal()]);
+    /**
+     * Save cart by inserting it into database
+     * @param cart cart to be saved
+     * @param username username  of cashier associated cart to be saved into database
+     */
+    static async saveCart(cart: Cart, username: string): Promise<Cart> {
+        cart.calculateTotal();
 
-        const cartId = result.rows[0].cart_id;
-        cart.setCartId(cartId);
-        for (let i = 0 ;i < cart.getItems().length; i++) {
-            let product = cart.getItems()[i];
-            let quantity = cart.getQuantities()[i];
+        let cartId = cart.getCartId();
+
+        if (cartId === undefined) {
+            const result = await db().query<{ cart_id: number }>(
+                "insert into cart(total,cashier) values ($1,$2) returning cart_id",
+                [cart.getTotal(), username]
+            );
+
+            cartId = result.rows[0].cart_id;
+            cart.setCartId(cartId);
+        } else {
             await db().query(
-                "insert into cartItem(product_name, cart_id, quantity, current_total) values($1, $2, $3, $4)",
-                [
-                    product.getName(),
-                    cartId,
-                    quantity,
-                    cart.getTotal()
-                ]
+                "update cart set total = $1 where cart_id = $2",
+                [cart.getTotal(), cartId]
+            );
+
+            await db().query(
+                "delete from cartItem where cart_id = $1",
+                [cartId]
+            );
+
+            await db().query(
+                "delete from cartCoupon where cart_id = $1",
+                [cartId]
             );
         }
 
-        for (let coupon of cart.getCoupons()) {
+        for (let i = 0; i < cart.getItems().length; i++) {
+            const product = cart.getItems()[i];
+            const quantity = cart.getQuantities()[i];
+            const rowTotal = product.getPrice() * quantity;
+
+            await db().query(
+                `insert into cartItem(product_name, cart_id, quantity, current_total)
+                 values ($1, $2, $3, $4)`,
+                [product.getName(), cartId, quantity, rowTotal]
+            );
+        }
+
+        for (let i = 0; i < cart.getCoupons().length; i++) {
+            const coupon = cart.getCoupons()[i];
+
             await db().query(
                 "insert into cartCoupon(coupon, cart_id) values($1, $2)",
-                [
-                    coupon.getName(),
-                    cartId
-                ]
+                [coupon.getName(), cartId]
             );
         }
 
         return cart;
-
     }
-    getQuantities(){
+
+    getQuantities() {
         return this.#quantities;
     }
 
+    /**
+     * Remove coupon from a list of coupons in the cart if it has been added
+     * @param coupon the coupon to be removed from the cart
+     */
     removeCoupon(coupon: Coupon): void {
         let index = -1;
 
@@ -132,11 +192,16 @@ export default class Cart {
 
         if (index !== -1) {
             this.#coupons.splice(index, 1);
-        }else{
+        } else {
             throw new InvalidCouponRemovalException();
         }
         this.#notifyAll();
     }
+
+    /**
+     * Gets cart from database based on cart_id
+     * @param cart_id the cart_id we want to get cart based on
+     */
     static async getCartById(cart_id: number): Promise<Cart> {
         const result = await db().query<{
             cart_id: number;
@@ -152,9 +217,10 @@ export default class Cart {
         cart.setTotal(row.total);
 
         const products = await Cart.getItemsForCart(cart_id);
-        for (let product of products) {
-            cart.loadProduct(product);
+        for (let i = 0; i < products.length; i++) {
+            cart.loadProduct(products[i].product, products[i].quantity);
         }
+
 
         const coupons = await Cart.getCouponsForCart(cart_id);
         for (let coupon of coupons) {
@@ -163,35 +229,80 @@ export default class Cart {
 
         return cart;
     }
-    static async getItemsForCart(cart_id: number): Promise<Array<Product>>{
-        const items = new Array<Product>();
-        const itemResults = await db().query<{
-            product_name: string,
-            cart_id :number,
-            quantity: number,
-            current_total: number;
 
+    /**
+     * Gets items from database based on cart_id
+     * @param cart_id the cart_id we want to get items based on
+     */
+    static async getItemsForCart(cart_id: number): Promise<Array<{ product: Product; quantity: number }>> {
+        const items = new Array<{ product: Product; quantity: number }>();
+
+        const itemResults = await db().query<{
+            product_name: string;
+            cart_id: number;
+            quantity: number;
+            current_total: number;
         }>(
-            `select product_name,cart_id, quantity, current_total  from cartItem
+            `select product_name, cart_id, quantity, current_total
+             from cartItem
              where cart_id = $1`,
             [cart_id]
         );
 
-        for (let itemRow of itemResults.rows) {
-            for (let i = 0; i < itemRow.quantity; i++) {
-                let product = await Product.getProductByName(itemRow.product_name);
-                items.push(product);
+        for (let i = 0; i < itemResults.rows.length; i++) {
+            const itemRow = itemResults.rows[i];
+            const productName = itemRow.product_name;
+            let product: Product;
+
+            if (productName === "Strawberry Sunshine") {
+                product = await Smoothie.getSmoothieByName(productName);
+            } else if (productName === "Orange Juice") {
+                product = await Juice.getJuiceByName(productName);
+            } else {
+                product = await FrozenYogurt.getFroyoByName(productName);
             }
+
+            items.push({
+                product: product,
+                quantity: itemRow.quantity
+            });
         }
+
         return items;
     }
-    static async getCouponsForCart(cart_id: number):Promise<Array<Coupon>>{
+
+    /**
+     * Gets cart from database based on cashier username
+     * @param username the username we want to get cart based on
+     */
+    static async getCartByCashier(username: string): Promise<Cart | null> {
+        const result = await db().query<{
+            cart_id: number;
+        }>(
+            "select cart_id from cart where cashier = $1",
+            [username]
+        );
+
+        if (result.rows.length === 0) {
+            return null;
+        }
+
+        return await Cart.getCartById(result.rows[0].cart_id);
+    }
+
+    /**
+     * Gets coupons from database based on cart_id
+     * @param cart_id the cart_id we want to get coupon based on
+     */
+    static async getCouponsForCart(cart_id: number): Promise<Array<Coupon>> {
         const coupons = new Array<Coupon>();
         const couponResults = await db().query<{
             coupon: string;
             cart_id: number;
         }>(
-            `select coupon, cart_id from cartCoupon where cart_id = $1`,
+            `select coupon, cart_id
+             from cartCoupon
+             where cart_id = $1`,
             [cart_id]
         );
 
@@ -219,10 +330,11 @@ export default class Cart {
     /**
      * Remove product to a list of products in the cart if it has been added
      * @param product the product to be removed from the cart
-     * @param amount
+     * @param amount the quantity of product to be removed
      */
-    removeProduct(product: Product,amount:number): void {
+    removeProduct(product: Product, amount: number): void {
         let index = -1;
+
         for (let i = 0; i < this.#items.length; i++) {
             if (index === -1) {
                 if (this.#items[i].getName() === product.getName()) {
@@ -231,39 +343,39 @@ export default class Cart {
             }
         }
 
-        if (index === -1|| this.#quantities[index] < amount) {
+        if (amount <= 0 || index === -1 || this.#quantities[index] < amount) {
             throw new InvalidProductRemovalException();
-
         }
+
+        this.#items[index] = product;
         this.#quantities[index] = this.#quantities[index] - amount;
-        product.increaseQuantity(amount);
 
         if (this.#quantities[index] === 0) {
             this.#items.splice(index, 1);
             this.#quantities.splice(index, 1);
         }
 
+        this.calculateTotal();
         this.#notifyAll();
     }
 
-    getQuantityForProduct(productName: string): number {
-        for (let i = 0; i < this.#items.length; i++) {
-            if (this.#items[i].getName() === productName) {
-                return this.#quantities[i];
-            }
-        }
-        return 0;
+
+    getTotal(): number {
+        return this.#total;
     }
 
     /**
-     * Get total price of products in the cart
+     * calculate total price of products in the cart
      * @return number - the total price of the products in the cart
      */
-    getTotal(): number {
+    calculateTotal() {
+        let total = 0;
+
         for (let i = 0; i < this.#items.length; i++) {
-            this.#total = this.#total + this.#items[i].getPrice();
+            total = total + (this.#items[i].getPrice() * this.#quantities[i]);
         }
-        return this.#total;
+
+        this.#total = total;
     }
 
     getItems() {
@@ -274,23 +386,61 @@ export default class Cart {
      * Check out - purchase all items in cart if the items exist
      * @return Receipt - the receipt generated after purchasing the items in the cart
      */
-    checkOut(cashier: Cashier): Receipt {
-
-        if(this.#items.length === 0){
+    async checkOut(cashier: Cashier): Promise<Receipt> {
+        if (this.#items.length === 0) {
             throw new InvalidCartCheckoutException();
         }
 
-        for(let i = 0;i< this.#coupons.length ;i++){
+        for (let i = 0; i < this.#items.length; i++) {
+            const latestProduct = this.#items[i];
+            const quantityWanted = this.#quantities[i];
+
+            if (latestProduct.getQuantity() < quantityWanted) {
+                throw new OutOfStockException();
+            }
+        }
+
+        this.calculateTotal();
+
+        for (let i = 0; i < this.#coupons.length; i++) {
             this.#coupons[i].applyCoupon(this);
         }
+
+        const purchasedCart = this.copyCart();
+        const receipt = new Receipt(purchasedCart, cashier);
+
+        cashier.addReceipt(receipt);
+
+        for (let i = 0; i < this.#items.length; i++) {
+            const product = this.#items[i];
+            const quantityBought = this.#quantities[i];
+
+            product.reduceQuantity(quantityBought);
+
+            if (product.getName() === "Strawberry Sunshine") {
+                await Smoothie.saveProduct(product);
+            } else if (product.getName() === "Orange Juice") {
+                await Juice.saveProduct(product);
+            } else if (product.getName() === "Vanilla Froyo") {
+                await FrozenYogurt.saveProduct(product);
+            }
+        }
+
+        await Receipt.saveReceipt(receipt);
+
         this.#coupons = new Array<Coupon>();
-        let receipt = new Receipt(this,cashier);
         this.#items = new Array<Product>();
+        this.#quantities = new Array<number>();
+        this.setTotal(0);
+
+        await Cart.saveCart(this, cashier.getUserName());
+
         this.#notifyAll();
+
         return receipt;
     }
 
-     /**
+    /**
      * Register a listener by adding it to the list of listeners.
      * @param listener the listener to be registered
      */
@@ -298,19 +448,56 @@ export default class Cart {
         this.#listeners.push(listener);
     }
 
-    addCoupon(coupon:Coupon){
+    copyCart(): Cart {
+        const copiedCart = new Cart(this.getCartId());
+
+        copiedCart.setTotal(this.getTotal());
+
+        for (let i = 0; i < this.#items.length; i++) {
+            copiedCart.#items.push(this.#items[i]);
+            copiedCart.#quantities.push(this.#quantities[i]);
+        }
+
+        for (let i = 0; i < this.#coupons.length; i++) {
+            copiedCart.#coupons.push(this.#coupons[i]);
+        }
+
+        return copiedCart;
+    }
+
+
+    async addCoupon(coupon: any) {
         for (let i = 0; i < this.#coupons.length; i++) {
             if (this.#coupons[i].getName() === coupon.getName()) {
                 throw new InvalidCouponAdditionException();
             }
         }
         this.#coupons.push(coupon);
+        if (coupon.getName() === "BOGO") {
+            await BOGO.saveCoupon(coupon);
+        } else {
+            await Percent25.saveCoupon(coupon);
+        }
+
         this.#notifyAll();
     }
 
 }
-export class InvalidProductAdditionException extends Error { }
-export class InvalidProductRemovalException extends Error { }
-export class InvalidCartCheckoutException extends Error { }
-export class InvalidCouponAdditionException extends Error{}
-export class InvalidCouponRemovalException extends Error{}
+
+export class InvalidProductAdditionException extends Error {
+}
+
+export class InvalidProductRemovalException extends Error {
+}
+
+export class InvalidCartCheckoutException extends Error {
+}
+
+export class InvalidCouponAdditionException extends Error {
+}
+
+export class InvalidCouponRemovalException extends Error {
+}
+
+export class OutOfStockException extends Error {
+}

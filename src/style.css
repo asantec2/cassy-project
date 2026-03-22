@@ -160,14 +160,16 @@ button:focus-visible {
     vertical-align: middle;
     border-collapse: collapse;
 }
+
 #error {
     color: red;
     font-weight: bold;
     border: 2px solid red;
     padding: 6px 10px;
-    white-space: nowrap;   /* stay on one line */
+    white-space: nowrap; /* stay on one line */
     display: inline-block;
 }
+
 #error {
     color: red;
     font-weight: bold;
@@ -180,6 +182,7 @@ button:focus-visible {
 #error:empty {
     display: none;
 }
+
 html, body {
     margin: 0;
     padding: 0;
@@ -197,4 +200,235 @@ pglite-repl {
     width: 100%;
     height: 100%;
     display: block;
+}
+
+/* Apply blurred booster-style background */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    position: relative;
+}
+
+/* Background image layer */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../images/booster-background.png");
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px);
+    transform: scale(1.05);
+    z-index: -2;
+}
+
+/* Light overlay to soften background */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.3);
+    z-index: -1;
+}
+
+/* Dialog styling */
+#sign-in-dialog {
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    width: 350px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Inputs */
+#sign-in-dialog input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Buttons */
+#sign-in-dialog button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#sign-in-button {
+    background-color: #7ed957;
+}
+
+#create-account-button {
+    background-color: #f0f0f0;
+}
+
+/* Error text */
+
+#add-cashier-dialog {
+    border-radius: 20px;
+    padding: 25px;
+    width: 300px;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    background-color: #fff8f0;
+}
+
+/* container */
+.create-cashier-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* welcome text */
+.welcome-title {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.welcome-subtext {
+    text-align: center;
+    font-size: 14px;
+    color: gray;
+    margin-bottom: 10px;
+}
+
+/* inputs */
+.input-field {
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+/* button */
+.create-btn {
+    padding: 10px;
+    border-radius: 20px;
+    border: none;
+    background-color: #ff5e3a;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* error text */
+.error-text {
+    color: red;
+    text-align: center;
+}
+
+.welcome-text {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.welcome-text {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+#drink-images {
+    display: flex;
+    gap: 40px;
+}
+
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.cart-table th,
+.cart-table td {
+    padding: 8px 12px;
+}
+
+.item-name {
+    width: 50%;
+    text-align: left;
+}
+
+.item-price {
+    width: 25%;
+    text-align: center;
+}
+
+.item-quantity {
+    width: 25%;
+    text-align: center;
+}
+
+
+#drink-images {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.drink {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative; /* important */
+    gap: 10px;
+}
+
+#add-froyo-dialog,
+#remove-froyo-dialog {
+    position: absolute;
+    top: 120px; /* adjust until it sits right under the picture */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: white;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    margin: 0;
+    z-index: 2;
+}
+
+#error {
+    color: red;
+    font-weight: bold;
+    border: 2px solid red;
+    padding: 8px 12px;
+    display: block;
+    width: 320px; /* wider so wrapping happens later */
+    min-height: 40px;
+    margin: 10px auto;
+    border-radius: 8px;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    box-sizing: border-box;
+}
+
+.item-name {
+    width: 50%;
+    text-align: left;
+}
+
+.item-price {
+    width: 25%;
+    text-align: center;
+}
+
+.item-quantity {
+    width: 25%;
+    text-align: center;
 }

@@ -1,16 +1,35 @@
 /**
  * The {@code Juice} class represents a juice
- * product available for purchase which is one of the two types of product.
+ * product available for purchase which is one of the three types of product.
  */
 import Product from "./Product.ts";
+import db from "./connection.ts";
 
 
 export default class Juice extends Product {
 
 
     //constructor
-    constructor(name: string, price: number, quantity:number) {
-        super(name, price,quantity);
+    constructor(name: string, price: number, quantity: number) {
+        super(name, price, quantity);
 
+    }
+
+    /**
+     * Get juice from database based on the name
+     * @param name the name of juice we want to get from database
+     */
+    static async getJuiceByName(name: string): Promise<Juice> {
+        const result = await db().query<{
+            quantity: number;
+            name: string;
+            price: number;
+        }>(
+            "select quantity, name, price from product where name = $1",
+            [name]
+        );
+
+        const row = result.rows[0];
+        return new Juice(row.name, row.price, row.quantity);
     }
 }

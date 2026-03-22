@@ -1,6 +1,7 @@
 /**
- * The {@code ReceiptView} class represents the user interface for displaying a {@link Receipt}.
- * It shows purchased {@link Product} items, the total cost, and provides navigation back to the cart.
+ * The {@code CartController} class manages user interactions with the {@link Cart}.
+ * It handles adding and removing products, applying and removing coupons,
+ * and coordinating the checkout process between the {@link Cart} model and the views.
  */
 
 import Cart from "../model/Cart.ts";
@@ -11,7 +12,6 @@ import Smoothie from "../model/Smoothie.ts";
 import Juice from "../model/Juice.ts";
 import Cashier from "../model/Cashier.ts";
 import type Coupon from "../model/Coupon.ts";
-import Receipt from "../model/Receipt.ts";
 import BOGO from "../model/BOGO.ts";
 import Percent25 from "../model/Percent25.ts";
 import FrozenYogurt from "../model/FrozenYogurt.ts";
@@ -25,103 +25,153 @@ export default class CartController {
 
 
     //constrictor
-    constructor(cashier:Cashier) {
+    constructor(cashier: Cashier, cart: Cart) {
         this.#cashier = cashier;
-        this.#cart = new Cart();
+        this.#cart = cart;
         this.#cartView = new CartView(this.#cart, this);
+        this.#cartView.notify();
     }
 
     /**
      * Adds a product to the cart.
      * @param product the product to be added to the cart
-     * @param amount
+     * @param amount  the amount  of product to be added
      */
-    addToCart(product: Product,amount : number) {
-        this.#cart.addProduct(product,amount);
+    async addToCart(product: Product, amount: number) {
+        this.#cart.addProduct(product, amount);
+        await Cart.saveCart(this.#cart, this.#cashier.getUserName());
+
 
     }
 
     /**
      * Removes a product from the cart.
      * @param product the product to be removed from the cart
-     * @param amount
+     * @param amount the amount of product to be removed
      */
-    removeFromCart(product: Product, amount: number) {
-        this.#cart.removeProduct(product,amount);
+    async removeFromCart(product: Product, amount: number) {
+        this.#cart.removeProduct(product, amount);
+        await Cart.saveCart(this.#cart, this.#cashier.getUserName());
 
     }
-    addCouponToCart(coupon: Coupon) {
-        this.#cart.addCoupon(coupon);
+
+    /**
+     * Adds a coupon to the cart.
+     * @param coupon coupon to be added to cart
+     */
+    async addCouponToCart(coupon: Coupon) {
+        await this.#cart.addCoupon(coupon);
+        await Cart.saveCart(this.#cart, this.#cashier.getUserName());
     }
-    removeCouponFromCart(coupon: Coupon) {
+
+    /**
+     * Removes a coupon to the cart.
+     * @param coupon coupon to be removed to cart
+     */
+    async removeCouponFromCart(coupon: Coupon) {
         this.#cart.removeCoupon(coupon);
-    }
-    addBOGO() {
-        this.addCouponToCart(new BOGO("BOGO", "buy one get one free"));
-    }
-
-    removeBOGO() {
-        this.removeCouponFromCart(new BOGO("BOGO", "buy one get one free"));
-    }
-
-    addPercent25() {
-        this.addCouponToCart(new Percent25("PERCENT25", "25 percent off"));
-    }
-
-    removePercent25() {
-        this.removeCouponFromCart(new Percent25("PERCENT25", "25 percent off"));
+        await Cart.saveCart(this.#cart, this.#cashier.getUserName());
     }
 
     /**
-     * Creates a Smoothie and adds it to the cart.
+     * Adds BOGO to cart
      */
-    addSmoothie() {
-        this.addToCart(new Smoothie("Strawberry Sunshine", 10,20),1);
+    async addBOGO() {
+        await this.addCouponToCart(new BOGO("BOGO", "buy one get one free"));
     }
 
     /**
-     * Creates a Smoothie and removes it from the cart.
+     * Removes BOGO from cart
      */
-    removeSmoothie() {
-        this.removeFromCart(new Smoothie("Strawberry Sunshine", 10,20),1);
+    async removeBOGO() {
+        await this.removeCouponFromCart(new BOGO("BOGO", "buy one get one free"));
     }
 
     /**
-     * Creates a Juice and adds it to the cart.
+     * Adds percent25 to cart
      */
-    addJuice() {
-        this.addToCart(new Juice("Orange Juice", 15,20),1);
+    async addPercent25() {
+        await this.addCouponToCart(new Percent25("PERCENT25", "25 percent off"));
     }
 
     /**
-     * Creates a Juice and removes it from the cart.
+     * Removes percent25 from cart
      */
-    removeJuice() {
-        this.removeFromCart(new Juice("Orange Juice", 15,20),1);
+    async removePercent25() {
+        await this.removeCouponFromCart(new Percent25("PERCENT25", "25 percent off"));
     }
 
-    addFroyo(amount:number){
-        this.addToCart(new FrozenYogurt("Vanilla Froyo",12,500),amount);
+    /**
+     * Adds smoothie to the cart.
+     */
+    async addSmoothie() {
+        const product = await Smoothie.getSmoothieByName("Strawberry Sunshine");
+        await this.addToCart(product, 1);
+
     }
 
-    removeFroyo(amount: number){
-        this.removeFromCart(new FrozenYogurt("Vanilla Froyo",12,500),amount);
+    /**
+     * Removes Smoothie from the cart.
+     */
+    async removeSmoothie() {
+        const product = await Smoothie.getSmoothieByName("Strawberry Sunshine");
+        await this.removeFromCart(product, 1);
+
+    }
+
+    /**
+     * Adds juice to the cart.
+     */
+    async addJuice() {
+        const product = await Juice.getJuiceByName("Orange Juice");
+        await this.addToCart(product, 1);
+
+    }
+
+    /**
+     * Removes Juice from the cart.
+     */
+    async removeJuice() {
+        const product = await Juice.getJuiceByName("Orange Juice");
+        await this.removeFromCart(product, 1);
+
+    }
+
+    /**
+     * Adds frozen yogurt to the cart.
+     */
+    async addFroyo(amount: number) {
+        const product = await FrozenYogurt.getFroyoByName("Vanilla Froyo");
+        await this.addToCart(product, amount);
+
+    }
+
+    /**
+     * Removes Frozen yogurt from the cart.
+     */
+    async removeFroyo(amount: number) {
+        const product = await FrozenYogurt.getFroyoByName("Vanilla Froyo");
+        await this.removeFromCart(product, amount);
+
     }
 
     /**
      * Completes the checkout process and displays the receipt.
      */
     async checkOut() {
-        const receipt = this.#cart.checkOut(this.#cashier);
-        await Cart.saveCart(this.#cart);
-        await Receipt.saveReceipt(receipt);
+        const receipt = await this.#cart.checkOut(this.#cashier);
         new ReceiptView(receipt, this);
     }
+
 
     /**
      * Displays the cart view so the user can continue shopping.
      */
     showCartView() {
         this.#cartView = new CartView(this.#cart, this);
+    }
+
+    getCashier(): Cashier {
+        return this.#cashier;
     }
 }

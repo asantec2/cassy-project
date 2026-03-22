@@ -4,9 +4,7 @@
  */
 import {assert} from "../assertions.ts";
 import db from "./connection.ts";
-import Juice from "./Juice.ts";
-import Smoothie from "./Smoothie.ts";
-import FrozenYogurt from "./FrozenYogurt.ts";
+
 
 export default abstract class Product {
     #name: string;
@@ -14,7 +12,7 @@ export default abstract class Product {
     #quantity: number;
 
     //constructor
-    constructor(name: string, price: number,quantity :number) {
+    constructor(name: string, price: number, quantity: number) {
         this.#name = name;
         this.#price = price;
         this.#quantity = quantity;
@@ -28,66 +26,26 @@ export default abstract class Product {
         assert(this.#quantity >= 0, "quantity must be greater than or equal to 0");
     }
 
-    static async saveProduct(product : Product):Promise<Product>{
-        await db().query<{
-            quantity: number
-            name : string;
-            price: number,
-
-        }>("insert into product(quantity,name,price) values($1,$2,$3) on conflict do nothing returning name",
+    /**
+     * Save product by inserting it into database
+     * @param product product to be saved into database
+     */
+    static async saveProduct(product: Product): Promise<Product> {
+        await db().query(
+            `update product
+             set quantity = $1,
+                 price    = $2
+             where name = $3`,
             [
                 product.getQuantity(),
-                product.getName(),
-                product.getPrice()
-
-            ]);
-        return product;
-    }
-    static async getAllProducts(): Promise<Array<Product>> {
-        const allProducts = new Array<Product>();
-
-        let results = await db()
-            .query<{ name: string, price: number, quantity: number }>(
-                "select name, price, quantity from product"
-            );
-
-        for (let row of results.rows) {
-
-            if (row.name === "Strawberry Sunshine") {
-                allProducts.push(new Smoothie(row.name, row.price, row.quantity));
-            } else if (row.name === "Orange Juice") {
-                allProducts.push( new Juice(row.name, row.price, row.quantity));
-            } else if (row.name === "Vanilla Froyo") {
-                allProducts.push(new FrozenYogurt(row.name, row.price, row.quantity));
-            }
-        }
-
-        return allProducts;
-    }
-    static async getProductByName(name: string):Promise<Product>{
-        const result = await db().query<
-            {
-                quantity: number
-                name: string,
-                price: number,
-
-            }
-        >(
-            "select quantity,name, price  from product where name = $1",
-            [name]
+                product.getPrice(),
+                product.getName()
+            ]
         );
 
-        const row = result.rows[0];
-        let product : any;
-        if (row.name === "Strawberry Sunshine") {
-            product =  new Smoothie(row.name, row.price, row.quantity);
-        } else if (row.name === "Orange Juice") {
-            product = new Juice(row.name, row.price, row.quantity);
-        } else if (row.name === "Vanilla Froyo") {
-            product = new FrozenYogurt(row.name, row.price, row.quantity);
-        }
         return product;
     }
+
     getPrice(): number {
         return this.#price;
     }
@@ -95,9 +53,7 @@ export default abstract class Product {
     getName(): string {
         return this.#name;
     }
-    setPrice(newPrice: number){
-        this.#price = newPrice;
-   }
+
 
     getQuantity(): number {
         return this.#quantity;
@@ -106,18 +62,9 @@ export default abstract class Product {
     /**
      * Reduces the quantity of Product
      */
-    reduceQuantity(quantity:number): void {
+    reduceQuantity(quantity: number): void {
         this.#quantity = this.#quantity - quantity;
         this.#checkProduct();
     }
-
-    /**
-     * Increases the quantity of stock of Product by one
-     */
-    increaseQuantity(quantity:number): void {
-        this.#quantity  = this.#quantity + quantity;
-        this.#checkProduct();
-    }
-
 
 }

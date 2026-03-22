@@ -1,39 +1,48 @@
+/**
+ * The {@code ReceiptView} class represents the user interface for displaying a {@link Receipt}.
+ * It shows purchased {@link Cart}which contains items and their quantity, the total cost,and
+ * the time transaction was made and provides navigation back to the cart.
+ */
+
 import Receipt from "../model/Receipt.ts";
 import CartController from "../Controller/CartController.ts";
 
-export default class ReceiptView{
-    #receipt :Receipt;
-    #cartController :CartController;
+export default class ReceiptView {
+    #receipt: Receipt;
+    #cartController: CartController;
     #itemsEl: HTMLUListElement;
 
     //constructor
-    constructor(receipt:Receipt,cartController : CartController) {
+    constructor(receipt: Receipt, cartController: CartController) {
         this.#receipt = receipt;
         this.#cartController = cartController;
         document.querySelector("#app")!.innerHTML = `
-        <div id="receipt">
-            <strong>Receipt</strong>
-            <p></p>
-            
-            <img src="/images/receipt.png" alt="Receipt Image" width="400" />
+<div id="receipt">
 
-         <ul></ul>
+    <p><strong>Cashier: ${this.#receipt.getCashier().getUserName()}</strong></p>
 
-            <div style="margin-top: 10px;">
-                <table class="cart-table">
-                    <tr>
-                        <td class="item-name"><strong>Total</strong></td>
-                        <td class="item-price"><strong>$${this.#receipt.getCart().getTotal()}.00</strong></td>
-                    </tr>
-                </table>
-         </div>
-            <strong>Thank you for your purchase!</strong>
-            <p></p>
+    <img src="/images/receipt.png" alt="Receipt Image" width="400" />
 
-            <button id="back-to-cart">Back to cart</button>
-        </div>
-        `;
+    <ul></ul>
 
+    <div style="margin-top: 10px;">
+        <table class="cart-table">
+            <tr>
+                <td class="item-name"><strong>Total</strong></td>
+                <td class="item-price"><strong>$${this.#receipt.getCart().getTotal()}.00</strong></td>
+                <td class="item-quantity"></td>
+            </tr>
+        </table>
+    </div>
+
+    <p><strong>Date:</strong>${new Date(this.#receipt.getTimeStamp()).toLocaleString()}</p>
+
+    <strong>Thank you for your purchase!</strong>
+    <p></p>
+
+    <button id="back-to-cart">Back to cart</button>
+</div>
+`;
         this.#itemsEl = document.querySelector("#receipt > ul")!;
 
         document.querySelector("#back-to-cart")!
@@ -49,16 +58,33 @@ export default class ReceiptView{
     #showItems(): void {
         this.#itemsEl.replaceChildren();
 
-        this.#receipt.getCart().getItems().forEach((p) => {
+
+        const headerEl = document.createElement("li");
+        headerEl.innerHTML = `
+        <table class="cart-table">
+            <tr>
+                <th class="item-name">Product</th>
+                <th class="item-price">Unit Price</th>
+                <th class="item-quantity">Quantity</th>
+            </tr>
+        </table>
+    `;
+        this.#itemsEl.appendChild(headerEl);
+
+
+        this.#receipt.getCart().getItems().forEach((p, i) => {
+            const quantity = this.#receipt.getCart().getQuantities()[i];
+
             const li = document.createElement("li");
             li.innerHTML = `
-                <table class="cart-table">
-                    <tr>
-                        <td class="item-name">${p.getName()}</td>
-                        <td class="item-price">$${p.getPrice()}.00</td>
-                    </tr>
-                </table>
-            `;
+            <table class="cart-table">
+                <tr>
+                    <td class="item-name">${p.getName()}</td>
+                    <td class="item-price">$${p.getPrice()}.00</td>
+                    <td class="item-quantity">${quantity}</td>
+                </tr>
+            </table>
+        `;
             this.#itemsEl.appendChild(li);
         });
     }
