@@ -448,6 +448,10 @@ export default class Cart {
         this.#listeners.push(listener);
     }
 
+    /**
+     * Make a deep copy of the current cart
+     * @return Cart the deep copy of the cart
+     */
     copyCart(): Cart {
         const copiedCart = new Cart(this.getCartId());
 
@@ -466,6 +470,10 @@ export default class Cart {
     }
 
 
+    /**
+     * Adds coupon to cart
+     * @param coupon to be added to cart
+     */
     async addCoupon(coupon: any) {
         for (let i = 0; i < this.#coupons.length; i++) {
             if (this.#coupons[i].getName() === coupon.getName()) {

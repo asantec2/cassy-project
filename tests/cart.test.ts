@@ -281,7 +281,7 @@ test("Can get full cart by id with items and coupons", async () => {
     );
 
     let cart = new Cart();
-    let product = await Smoothie.getSmoothieByName("Strawberry Sunshine");
+    let product = await FrozenYogurt.getFroyoByName("Vanilla Froyo");
 
     cart.addProduct(product, 2);
     cart.loadCoupon(new BOGO("BOGO", "buy one get one free"));
@@ -291,7 +291,7 @@ test("Can get full cart by id with items and coupons", async () => {
     let loadedCart = await Cart.getCartById(cart.getCartId()!);
 
     expect(loadedCart.getItems().length).toBe(1);
-    expect(loadedCart.getItems()[0].getName()).toBe("Strawberry Sunshine");
+    expect(loadedCart.getItems()[0].getName()).toBe("Vanilla Froyo");
     expect(loadedCart.getQuantities()[0]).toBe(2);
     expect(loadedCart.getCoupons().length).toBe(1);
     expect(loadedCart.getCoupons()[0].getName()).toBe("BOGO");

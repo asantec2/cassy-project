@@ -56,11 +56,11 @@ export default class Receipt {
     static async getReceiptForCashier(cashier: Cashier): Promise<Array<Receipt>> {
         let results = await db().query<
             {
-                timeStamp: string,
+                timestamp: string,
                 cart: number,
                 cashier: string
             }
-        >("select timeStamp,cart, cashier from receipt where cashier = $1",
+        >("select timeStamp as timestamp ,cart, cashier from receipt where cashier = $1",
             [cashier.getUserName()])
 
         let allReceipts = new Array<Receipt>();
@@ -68,7 +68,7 @@ export default class Receipt {
             let cart = await Cart.getCartById(row.cart);
             let cashier = await Cashier.getCashierByUsername(row.cashier);
             // @ts-ignore
-            let receipt = new Receipt(cart, cashier, row.timeStamp);
+            let receipt = new Receipt(cart, cashier, row.timestamp);
             allReceipts.push(receipt);
         }
 
@@ -85,7 +85,7 @@ export default class Receipt {
             cart: number;
             cashier: string;
         }>(
-            "select timeStamp, cart, cashier from receipt where cart = $1",
+            "select timeStamp as timestamp , cart, cashier from receipt where cart = $1",
             [cartId]
         );
 

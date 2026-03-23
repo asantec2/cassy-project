@@ -22,6 +22,7 @@ export default class CartView {
     #errorEl: HTMLSpanElement;
     #addFroyoDialog: HTMLDialogElement;
     #removeFroyoDialog: HTMLDialogElement;
+    #couponEl: HTMLElement;
 
     //constructor
     constructor(cart: Cart, cartController: CartController) {
@@ -113,12 +114,18 @@ export default class CartView {
             <input type="number" id="remove-froyo-amount" />
             <button id="remove-froyo">Remove Froyo</button>
         `;
+        this.#couponEl = document.createElement("div");
+        this.#couponEl.className = "coupon-display";
+        this.#couponEl.textContent = "No coupons added";
+
+
         this.#removeFroyoDialog.querySelector("button")!
             .addEventListener("click", () => this.#removeFroyo());
         document.body.appendChild(this.#removeFroyoDialog);
 
         this.#teamEl = document.querySelector("#cart > ul")!;
         this.#errorEl = document.querySelector("#error")! as HTMLSpanElement;
+        this.#teamEl.appendChild(this.#couponEl);
 
         document.querySelector("#add-smoothie")!
             .addEventListener("click", () => this.#addSmoothie());
@@ -176,6 +183,20 @@ export default class CartView {
     }
 
     /**
+     * Create display based on coupons in the cart
+     */
+    #updateCouponDisplay() {
+        const coupons = this.#cart.getCoupons();
+
+        if (coupons.length === 0) {
+            this.#couponEl.textContent = "No coupons applied";
+        } else {
+            this.#couponEl.textContent =
+                "Added coupons: " + coupons.map(c => c.getName()).join(", ");
+        }
+    }
+
+    /**
      * Displays items in cart with quantity and total
      */
     notify() {
@@ -218,6 +239,9 @@ export default class CartView {
             </table>
         `;
         this.#teamEl.appendChild(totalEl);
+
+        this.#updateCouponDisplay();
+        this.#teamEl.appendChild(this.#couponEl);
     }
 
     /**
@@ -343,6 +367,9 @@ export default class CartView {
         }
     }
 
+    /**
+     * Checkout of a cart by creating receipt and displaying it
+     */
     async #checkOut() {
         try {
             await this.#cartController.checkOut();
@@ -371,6 +398,7 @@ export default class CartView {
         try {
             await this.#cartController.addBOGO();
             this.#errorEl.textContent = "";
+           this.notify();
         } catch (e: any) {
             if (e instanceof InvalidCouponAdditionException) {
                 this.#errorEl.textContent = "BOGO has already been added to the cart!";
@@ -387,6 +415,7 @@ export default class CartView {
         try {
             await this.#cartController.removeBOGO();
             this.#errorEl.textContent = "";
+            this.notify();
         } catch (e: any) {
             if (e instanceof InvalidCouponRemovalException) {
                 this.#errorEl.textContent = "BOGO has not been added to the cart!";
@@ -403,6 +432,7 @@ export default class CartView {
         try {
             await this.#cartController.addPercent25();
             this.#errorEl.textContent = "";
+            this.notify();
         } catch (e: any) {
             if (e instanceof InvalidCouponAdditionException) {
                 this.#errorEl.textContent =
@@ -420,6 +450,7 @@ export default class CartView {
         try {
             await this.#cartController.removePercent25();
             this.#errorEl.textContent = "";
+            this.notify();
         } catch (e: any) {
             if (e instanceof InvalidCouponRemovalException) {
                 this.#errorEl.textContent =

@@ -46,6 +46,7 @@ create table if not exists cartCoupon(
     foreign key (cart_id) references cart(cart_id)
     on delete cascade
     );
+-- insert stock and price of products into store--
 insert into product(quantity, name, price) values(10, 'Orange Juice', 5),
 (10, 'Strawberry Sunshine', 6),(30, 'Vanilla Froyo', 6)
     on conflict (name) do nothing;

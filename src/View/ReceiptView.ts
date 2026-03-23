@@ -11,11 +11,15 @@ export default class ReceiptView {
     #receipt: Receipt;
     #cartController: CartController;
     #itemsEl: HTMLUListElement;
+    #couponEl: HTMLLIElement;
 
-    //constructor
     constructor(receipt: Receipt, cartController: CartController) {
         this.#receipt = receipt;
         this.#cartController = cartController;
+
+        this.#couponEl = document.createElement("li");
+        this.#couponEl.className = "coupon-display";
+
         document.querySelector("#app")!.innerHTML = `
 <div id="receipt">
 
@@ -35,7 +39,7 @@ export default class ReceiptView {
         </table>
     </div>
 
-    <p><strong>Date:</strong>${new Date(this.#receipt.getTimeStamp()).toLocaleString()}</p>
+    <p><strong>Date:</strong> ${new Date(this.#receipt.getTimeStamp()).toLocaleString()}</p>
 
     <strong>Thank you for your purchase!</strong>
     <p></p>
@@ -43,6 +47,7 @@ export default class ReceiptView {
     <button id="back-to-cart">Back to cart</button>
 </div>
 `;
+
         this.#itemsEl = document.querySelector("#receipt > ul")!;
 
         document.querySelector("#back-to-cart")!
@@ -58,7 +63,6 @@ export default class ReceiptView {
     #showItems(): void {
         this.#itemsEl.replaceChildren();
 
-
         const headerEl = document.createElement("li");
         headerEl.innerHTML = `
         <table class="cart-table">
@@ -68,9 +72,8 @@ export default class ReceiptView {
                 <th class="item-quantity">Quantity</th>
             </tr>
         </table>
-    `;
+        `;
         this.#itemsEl.appendChild(headerEl);
-
 
         this.#receipt.getCart().getItems().forEach((p, i) => {
             const quantity = this.#receipt.getCart().getQuantities()[i];
@@ -84,8 +87,25 @@ export default class ReceiptView {
                     <td class="item-quantity">${quantity}</td>
                 </tr>
             </table>
-        `;
+            `;
             this.#itemsEl.appendChild(li);
         });
+
+        this.#updateCouponDisplay();
+        this.#itemsEl.appendChild(this.#couponEl);
+    }
+
+    /**
+     * Create display based on coupons in the cart
+     */
+    #updateCouponDisplay() {
+        const coupons = this.#receipt.getCart().getCoupons();
+
+        if (coupons.length === 0) {
+            this.#couponEl.textContent = "No coupons applied";
+        } else {
+            this.#couponEl.textContent =
+                "Applied coupons: " + coupons.map(c => c.getName()).join(", ");
+        }
     }
 }

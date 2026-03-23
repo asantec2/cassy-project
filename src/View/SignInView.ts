@@ -22,7 +22,7 @@ export default class SignInView {
         this.#dialog = document.createElement("dialog");
         this.#dialog.id = "sign-in-dialog";
         this.#dialog.innerHTML = `
-            <h2 class="welcome-title">Welcome to Booster Juice 🍓🥤</h2>
+            <h2 class="welcome-title">Welcome to Booster Juice </h2>
             <p class="welcome-subtext">Sign in or Create your account to start ordering!</p>
             <span id="error"></span><br />
             
