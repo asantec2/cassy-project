@@ -33,53 +33,7 @@ export default class CashierController {
         });
 
     }
-    /**
-     * Converts an ArrayBuffer into a hexadecimal string.
-     * @param buffer the ArrayBuffer to convert
-     * @returns the hexadecimal string
-     */
-    static bytesToHex(buffer: ArrayBuffer): string {
-        const bytes = new Uint8Array(buffer);
-        let hex = "";
 
-        for (let i = 0; i < bytes.length; i++) {
-            hex = hex + bytes[i].toString(16).padStart(2, "0");
-        }
-
-        return hex;
-    }
-    /**
-     * Hashes a password using PBKDF2 and the username as the salt.
-     * @param password the plain text password
-     * @param username the username used as salt
-     * @returns the hashed password as a hexadecimal string
-     */
-    static async hashPassword(password: string, username: string): Promise<string> {
-        const encoder = new TextEncoder();
-        const passwordBytes = encoder.encode(password);
-        const saltBytes = encoder.encode(username);
-
-        const keyMaterial = await crypto.subtle.importKey(
-            "raw",
-            passwordBytes,
-            { name: "PBKDF2" },
-            false,
-            ["deriveBits"]
-        );
-
-        const derivedBits = await crypto.subtle.deriveBits(
-            {
-                name: "PBKDF2",
-                salt: saltBytes,
-                iterations: 10000,
-                hash: "SHA-256"
-            },
-            keyMaterial,
-            256
-        );
-
-        return CashierController.bytesToHex(derivedBits);
-    }
 
 
     /**
@@ -88,16 +42,7 @@ export default class CashierController {
      * @param password the  password of cashier to be created
      */
     async createCashier(username: string, password: string) {
-        const existingCashier = await Cashier.getCashierByUsername(username);
-
-        if (existingCashier !== null) {
-            throw new DuplicateUserNameException();
-        }
-
-        const hashedPassword = await CashierController.hashPassword(password, username);
-
-        this.#cashier = new Cashier(username, hashedPassword);
-        await Cashier.saveCashier(this.#cashier);
+        this.#cashier = await Cashier.createNewCashier(username, password);
 
         let cart = await Cart.getCartByCashier(username);
 
@@ -109,7 +54,6 @@ export default class CashierController {
         this.#createCashierView = undefined;
         this.#signInView = undefined;
         this.#cartController = new CartController(this.#cashier, cart);
-
     }
 
     /**
@@ -118,17 +62,7 @@ export default class CashierController {
      * @param password the password of cashier to be signed in
      */
     async signIn(username: string, password: string) {
-        const cashier = await Cashier.getCashierByUsername(username);
-
-        if (cashier === null) {
-            throw new UserNameUnfoundException();
-        }
-
-        const hashedPassword = await CashierController.hashPassword(password, username);
-
-        if (cashier.getPassword() !== hashedPassword) {
-            throw new IncorrectPasswordException();
-        }
+        const cashier = await Cashier.verifySignIn(username, password);
 
         let cart = await Cart.getCartByCashier(username);
 
@@ -142,13 +76,9 @@ export default class CashierController {
         this.#createCashierView = undefined;
         this.#cartController = new CartController(this.#cashier, cart);
     }
+
+
 }
 
-export class DuplicateUserNameException extends Error {
-}
 
-export class UserNameUnfoundException extends Error {
-}
 
-export class IncorrectPasswordException extends Error {
-}

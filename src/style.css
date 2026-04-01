@@ -2,11 +2,9 @@
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
-
     color-scheme: light;
     background-color: #ffffff;
     color: #213547;
-
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -23,17 +21,39 @@ a:hover {
     color: #535bf2;
 }
 
+html,
 body {
     margin: 0;
-    display: flex;
-    place-items: center;
+    padding: 0;
     min-width: 320px;
     min-height: 100vh;
 }
 
-h1 {
-    font-size: 3.2em;
-    line-height: 1.1;
+body {
+    font-family: Arial, sans-serif;
+    position: relative;
+}
+
+/* Background image */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../images/booster-background.png");
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px);
+    transform: scale(1.05);
+    z-index: -2;
+}
+
+/* Light overlay */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.25);
+    z-index: -1;
 }
 
 #app {
@@ -41,29 +61,6 @@ h1 {
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
-}
-
-.logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-}
-
-.logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vanilla:hover {
-    filter: drop-shadow(0 0 2em #3178c6aa);
-}
-
-.card {
-    padding: 2em;
-}
-
-.read-the-docs {
-    color: #888;
 }
 
 button {
@@ -88,30 +85,64 @@ button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-    :root {
-        color: #213547;
-        background-color: #ffffff;
-    }
-
-    a:hover {
-        color: #747bff;
-    }
-
-    button {
-        background-color: #f9f9f9;
-    }
+/* MAIN TWO-COLUMN LAYOUT */
+/* MAIN LAYOUT */
+#cart {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: left;
 
 }
 
-#cart {
-    text-align: left;
-    max-width: 500px;
-    margin: 0 auto;
+/* clear floats */
+#cart::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+/* welcome text full width */
+.welcome-text {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 18px 0;
+    color: #333;
+    clear: both;
+}
+
+/* LEFT SIDE */
+#cart h2 {
+    float: left;
+    width: 64%;
+    margin: 0 0 10px 0;
+    padding-left: 4px;
 }
 
 #drink-images {
-    justify-content: center;
+    float: left;
+    width: 64%;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+#product-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    gap: 14px;
+    align-items: start;
+}
+
+#product-container > div,
+.drink {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
 }
 
 .drink {
@@ -119,6 +150,14 @@ button:focus-visible {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    position: relative;
+    text-align: center;
+}
+
+.drink img {
+    border-radius: 10px;
+    max-width: 100%;
+    height: auto;
 }
 
 .drink button {
@@ -126,112 +165,147 @@ button:focus-visible {
     font-size: 1em;
 }
 
-.cart-table {
-    width: 100%;
-    border-collapse: collapse;
+/* RIGHT SIDE */
+#cart h3,
+#cart ul,
+#cart #error,
+#cart .coupon-section,
+#cart #check-out {
+    float: right;
+    width: 32%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: none;
 }
 
-.cart-table td {
-    padding: 6px 0;
-}
-
-.item-name {
-    text-align: left;
-}
-
-.item-price {
-    text-align: right;
-    font-weight: bold;
+#cart h3 {
+    float: right;
+    width: 32%;
+    margin: 0 0 0 0;
+    padding: 16px 16px 0 16px;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
 }
 
 #cart ul {
-    list-style-position: outside;
-    padding-left: 1.2rem;
-    margin: 0;
+    list-style: none;
+    padding: 15px;
+    margin: 0 0 8px 0;
+    min-height: 120px;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    border-top: none;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 #cart li {
     margin: 8px 0;
 }
 
-.cart-table {
-    display: inline-table;
-    width: calc(100% - 1.2rem);
-    vertical-align: middle;
-    border-collapse: collapse;
-}
-
 #error {
     color: red;
     font-weight: bold;
     border: 2px solid red;
-    padding: 6px 10px;
-    white-space: nowrap; /* stay on one line */
-    display: inline-block;
-}
-
-#error {
-    color: red;
-    font-weight: bold;
-    border: 2px solid red;
-    padding: 6px 10px;
-    white-space: nowrap;
-    display: inline-block;
+    border-radius: 0;
+    border-top: none;
+    padding: 8px 12px;
+    min-height: 40px;
+    margin: 0 0 8px 0;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.96);
+    display: block;
 }
 
 #error:empty {
     display: none;
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
+.coupon-section {
+    margin: 0 0 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    border-top: none;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
-details {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 300px;
-    height: 1000vh;
+.coupon {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
 }
 
-pglite-repl {
+.coupon:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.coupon button {
+    margin-right: 8px;
+    margin-top: 5px;
+}
+
+#check-out {
+    float: right;
+    width: auto;                 /* not full panel width */
+    margin-top: 10px;
+    padding: 10px 18px;
+
+    border-radius: 20px;         /* normal button shape */
+    border: none;
+
+    background-color: #646cff;   /* nice button color */
+    color: black;
+
+    cursor: pointer;
+    font-weight: bold;
+
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+#check-out:hover {
+    background-color: #535bf2;
+}
+
+/* remove the empty paragraph gap before checkout */
+#cart > p:empty {
+    display: none;
+}
+/* cart table */
+.cart-table {
     width: 100%;
-    height: 100%;
-    display: block;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
-/* Apply blurred booster-style background */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    position: relative;
+.cart-table th,
+.cart-table td {
+    padding: 8px 12px;
+    vertical-align: middle;
 }
 
-/* Background image layer */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: url("../images/booster-background.png");
-    background-size: cover;
-    background-position: center;
-    filter: blur(8px);
-    transform: scale(1.05);
-    z-index: -2;
+.item-name {
+    width: 50%;
+    text-align: left;
 }
 
-/* Light overlay to soften background */
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.3);
-    z-index: -1;
+.item-price {
+    width: 25%;
+    text-align: center;
+    font-weight: bold;
 }
 
-/* Dialog styling */
+.item-quantity {
+    width: 25%;
+    text-align: center;
+}
+
+/* dialogs */
 #sign-in-dialog {
     border: none;
     border-radius: 16px;
@@ -240,7 +314,6 @@ body::after {
     background: rgba(255, 255, 255, 0.9);
 }
 
-/* Inputs */
 #sign-in-dialog input {
     width: 100%;
     padding: 8px;
@@ -249,7 +322,6 @@ body::after {
     border: 1px solid #ccc;
 }
 
-/* Buttons */
 #sign-in-dialog button {
     width: 100%;
     padding: 10px;
@@ -268,8 +340,6 @@ body::after {
     background-color: #f0f0f0;
 }
 
-/* Error text */
-
 #add-cashier-dialog {
     border-radius: 20px;
     padding: 25px;
@@ -279,14 +349,12 @@ body::after {
     background-color: #fff8f0;
 }
 
-/* container */
 .create-cashier-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 30px;
 }
 
-/* welcome text */
 .welcome-title {
     text-align: center;
     margin-bottom: 5px;
@@ -299,14 +367,12 @@ body::after {
     margin-bottom: 10px;
 }
 
-/* inputs */
 .input-field {
     padding: 8px;
     border-radius: 10px;
     border: 1px solid #ccc;
 }
 
-/* button */
 .create-btn {
     padding: 10px;
     border-radius: 20px;
@@ -317,78 +383,15 @@ body::after {
     cursor: pointer;
 }
 
-/* error text */
 .error-text {
     color: red;
     text-align: center;
 }
 
-.welcome-text {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.welcome-text {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 18px;
-}
-
-#drink-images {
-    display: flex;
-    gap: 40px;
-}
-
-.cart-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.cart-table th,
-.cart-table td {
-    padding: 8px 12px;
-}
-
-.item-name {
-    width: 50%;
-    text-align: left;
-}
-
-.item-price {
-    width: 25%;
-    text-align: center;
-}
-
-.item-quantity {
-    width: 25%;
-    text-align: center;
-}
-
-
-#drink-images {
-    display: flex;
-    gap: 40px;
-    justify-content: center;
-    align-items: flex-start;
-}
-
-.drink {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative; /* important */
-    gap: 10px;
-}
-
 #add-froyo-dialog,
 #remove-froyo-dialog {
     position: absolute;
-    top: 120px; /* adjust until it sits right under the picture */
+    top: 120px;
     left: 50%;
     transform: translateX(-50%);
     width: 220px;
@@ -401,34 +404,16 @@ body::after {
     z-index: 2;
 }
 
-#error {
-    color: red;
-    font-weight: bold;
-    border: 2px solid red;
-    padding: 8px 12px;
+details {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 1000vh;
+}
+
+pglite-repl {
+    width: 100%;
+    height: 100%;
     display: block;
-    width: 320px; /* wider so wrapping happens later */
-    min-height: 40px;
-    margin: 10px auto;
-    border-radius: 8px;
-    text-align: center;
-    white-space: normal;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    box-sizing: border-box;
-}
-
-.item-name {
-    width: 50%;
-    text-align: left;
-}
-
-.item-price {
-    width: 25%;
-    text-align: center;
-}
-
-.item-quantity {
-    width: 25%;
-    text-align: center;
 }

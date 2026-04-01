@@ -1,6 +1,6 @@
 create table if not exists cashier(
     username varchar(255) not null unique,
-    password varchar(255) not null unique
+    password varchar(255) not null
 );
 create table if not exists cart(
     cart_id serial not null unique,
@@ -11,6 +11,7 @@ create table if not exists cart(
 );
 create table if not exists product(
     quantity integer not null,
+    product_type varchar(255) not null,
     name varchar(255) not null unique,
     price integer not null
 
@@ -47,6 +48,30 @@ create table if not exists cartCoupon(
     on delete cascade
     );
 -- insert stock and price of products into store--
-insert into product(quantity, name, price) values(10, 'Orange Juice', 5),
-(10, 'Strawberry Sunshine', 6),(30, 'Vanilla Froyo', 6)
+insert into product(quantity,product_type, name, price) values(10, 'Juice','Orange Juice', 5)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(10, 'Smoothie','Strawberry Sunshine', 6)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(30, 'Frozen Yogurt','Vanilla Froyo', 6)
+    on conflict (name) do nothing;
+-- insert 10 new items--
+insert into product(quantity,product_type, name, price) values(10, 'Juice','Red Sunrise', 5)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(10, 'Smoothie','Mango Hurricane', 6)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(30, 'Frozen Yogurt','Strawberry Froyo', 6)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(10, 'Juice','Apple Juice', 5)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(10, 'Smoothie','Ripped Berry', 6)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(30, 'Frozen Yogurt','Blueberry Froyo', 6)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(10, 'Juice','Maui Juice', 5)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(10, 'Smoothie','Pirates Nectar', 6)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(30, 'Frozen Yogurt','Mango Froyo', 6)
+    on conflict (name) do nothing;
+insert into product(quantity,product_type, name, price) values(10, 'Smoothie','Canadian Colada', 6)
     on conflict (name) do nothing;

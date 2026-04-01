@@ -9,11 +9,15 @@ import Cart, {
     InvalidCouponRemovalException,
     InvalidCartCheckoutException,
     InvalidProductAdditionException,
-    InvalidProductRemovalException, OutOfStockException
+    InvalidProductRemovalException, OutOfStockException, InvalidRemovalAmount, InvalidAdditionAmount
 } from "../model/Cart.ts";
 import CartController from "../Controller/CartController.ts";
 import {InvalidBOGOApplicationException} from "../model/BOGO.ts";
 import {InvalidPercentApplicationException} from "../model/Percent25.ts";
+import  Smoothie from "../model/Smoothie.ts";
+import Product from "../model/Product.ts";
+import Juice from "../model/Juice.ts";
+import FrozenYogurt from "../model/FrozenYogurt.ts";
 
 export default class CartView {
     #cart: Cart;
@@ -23,6 +27,8 @@ export default class CartView {
     #addFroyoDialog: HTMLDialogElement;
     #removeFroyoDialog: HTMLDialogElement;
     #couponEl: HTMLElement;
+    #selectedAddFroyo?: FrozenYogurt;
+    #selectedRemoveFroyo?: FrozenYogurt;
 
     //constructor
     constructor(cart: Cart, cartController: CartController) {
@@ -38,32 +44,8 @@ export default class CartView {
             <h2>Menu</h2>
 
             <div id="drink-images">
-                <div class="drink">
-                    <img src="/images/smothie.png" alt="Smoothie" width="300">
-                    <p>Smoothie</p>
-                    <strong>Strawberry Sunshine</strong>
-                    <p></p>
-                    <button id="add-smoothie">Add Smoothie</button>
-                    <button id="remove-smoothie">Remove Smoothie</button>
-                </div>
-
-                <div class="drink">
-                    <img src="/images/juice.png" alt="Juice" width="300">
-                    <p>Juice</p>
-                    <strong>Orange Juice</strong>
-                    <p></p>
-                    <button id="add-juice">Add Juice</button>
-                    <button id="remove-juice">Remove Juice</button>
-                </div>
-
-                <div class="drink" id="froyo-section">
-                    <img src="/images/froyo.png" alt="Frozen Yogurt" width="300">
-                    <p>Frozen Yogurt</p>
-                    <strong>Vanilla Froyo</strong>
-                    <p></p>
-                    <button id="show-add-froyo">Add Froyo</button>
-                    <button id="show-remove-froyo">Remove Froyo</button>   
-                </div>
+            
+                   <div id="product-container"></div>
             </div>
 
             <h3>Cart</h3>
@@ -127,32 +109,10 @@ export default class CartView {
         this.#errorEl = document.querySelector("#error")! as HTMLSpanElement;
         this.#teamEl.appendChild(this.#couponEl);
 
-        document.querySelector("#add-smoothie")!
-            .addEventListener("click", () => this.#addSmoothie());
-
-        document.querySelector("#remove-smoothie")!
-            .addEventListener("click", () => this.#removeSmoothie());
-
-        document.querySelector("#add-juice")!
-            .addEventListener("click", () => this.#addJuice());
-
-        document.querySelector("#remove-juice")!
-            .addEventListener("click", () => this.#removeJuice());
 
         document.querySelector("#check-out")!
             .addEventListener("click", () => this.#checkOut());
 
-        document.querySelector("#show-add-froyo")!
-            .addEventListener("click", () => {
-                this.#positionDialog(this.#addFroyoDialog);
-                this.#addFroyoDialog.show();
-            });
-
-        document.querySelector("#show-remove-froyo")!
-            .addEventListener("click", () => {
-                this.#positionDialog(this.#removeFroyoDialog);
-                this.#removeFroyoDialog.show();
-            });
 
         document.querySelector("#add-bogo")!
             .addEventListener("click", () => this.#addBOGO());
@@ -165,23 +125,23 @@ export default class CartView {
 
         document.querySelector("#remove-percent")!
             .addEventListener("click", () => this.#removePercent25());
+
     }
 
     /**
      * Positions add Froyo dialogue right underneath Frozen yogurt picture
      * @param dialog the HTMLDialogElement to be positioned on the page
+     * @param anchorEl
      */
-    #positionDialog(dialog: HTMLDialogElement) {
-        const froyoImage = document.querySelector("#froyo-section img") as HTMLElement;
-        const rect = froyoImage.getBoundingClientRect();
+    #positionDialog(dialog: HTMLDialogElement, anchorEl: HTMLElement) {
+        const rect = anchorEl.getBoundingClientRect();
 
         dialog.style.position = "absolute";
-        dialog.style.top = `${rect.bottom + window.scrollY + 5}px`;  // directly under image
+        dialog.style.top = `${rect.bottom + window.scrollY + 5}px`;
         dialog.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
-        dialog.style.transform = "translateX(-50%)"; // center under image
+        dialog.style.transform = "translateX(-50%)";
         dialog.style.margin = "0";
     }
-
     /**
      * Create display based on coupons in the cart
      */
@@ -247,43 +207,42 @@ export default class CartView {
     /**
      * Adds Smoothie to cart if addition is valid
      */
-    async #addSmoothie() {
+    async #addSmoothie(product: Smoothie) {
         try {
-            await this.#cartController.addSmoothie();
+            await this.#cartController.addSmoothie(product);
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductAdditionException) {
                 this.#errorEl.textContent =
-                    "Strawberry Sunshine is unavailable at this time. Try again next time.";
+                    `${product.getName()} is unavailable at this time. Try again next time.`;
             } else {
                 console.log("unexpected error " + e);
             }
         }
     }
 
-    /**
-     * Adds Frozen yogurt to cart if addition is valid
-     */
     async #addFroyo() {
         const amount = this.#addFroyoDialog
             .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;
 
         try {
-            await this.#cartController.addFroyo(amount);
+            await this.#cartController.addFroyo(this.#selectedAddFroyo!, amount);
             this.#addFroyoDialog.querySelector("#add-froyo-error")!.textContent = "";
             this.#addFroyoDialog.querySelector("input[type='number']")!
                 .setAttribute("style", "border-color:;");
             this.#errorEl.textContent = "";
             this.#addFroyoDialog.close();
         } catch (e: any) {
-            if (e instanceof InvalidProductAdditionException) {
+            if (e instanceof InvalidAdditionAmount) {
                 this.#addFroyoDialog.querySelector("input[type='number']")!
                     .setAttribute("style", "border-color:red;");
                 this.#addFroyoDialog.querySelector("#add-froyo-error")!
-                    .textContent = "Invalid Froyo amount or Vanilla Froyo is unavailable.";
+                    .textContent =
+                    `Invalid ${this.#selectedAddFroyo!.getName()} amount. Please enter a number greater than 0.`;
+            } else if (e instanceof InvalidProductAdditionException) {
                 this.#errorEl.textContent =
-                    "Vanilla Froyo is unavailable at this time. Try again next time.";
-                this.#addFroyoDialog.close();
+                    `${this.#selectedAddFroyo!.getName()} is unavailable at this time. Try again next time.`;
+
             } else {
                 console.log("unexpected error " + e);
             }
@@ -298,20 +257,23 @@ export default class CartView {
             .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;
 
         try {
-            await this.#cartController.removeFroyo(amount);
+            await this.#cartController.removeFroyo(this.#selectedRemoveFroyo!, amount);
             this.#removeFroyoDialog.querySelector("#remove-froyo-error")!.textContent = "";
             this.#removeFroyoDialog.querySelector("input[type='number']")!
                 .setAttribute("style", "border-color:;");
             this.#errorEl.textContent = "";
             this.#removeFroyoDialog.close();
         } catch (e: any) {
-            if (e instanceof InvalidProductRemovalException) {
+            if (e instanceof InvalidRemovalAmount) {
                 this.#removeFroyoDialog.querySelector("input[type='number']")!
                     .setAttribute("style", "border-color:red;");
                 this.#removeFroyoDialog.querySelector("#remove-froyo-error")!
-                    .textContent = "Invalid Froyo amount or not enough Froyo in cart.";
-                this.#errorEl.textContent = "Vanilla Froyo has not been added to cart!";
-                this.#removeFroyoDialog.close();
+                    .textContent =
+                    `Invalid ${this.#selectedRemoveFroyo!.getName()} amount. Please enter a number greater than 0.`;
+            } else if (e instanceof InvalidProductRemovalException) {
+                this.#errorEl.textContent =
+                    `${this.#selectedRemoveFroyo!.getName()} has not been added to cart!`;
+                    this.#removeFroyoDialog.close();
             } else {
                 console.log("unexpected error " + e);
             }
@@ -321,13 +283,13 @@ export default class CartView {
     /**
      * Removes Smoothie from cart if it has been added to cart
      */
-    async #removeSmoothie() {
+    async #removeSmoothie(product:Smoothie) {
         try {
-            await this.#cartController.removeSmoothie();
+            await this.#cartController.removeSmoothie(product);
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
-                this.#errorEl.textContent = "Strawberry Sunshine has not been added to cart!";
+                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!`;
             } else {
                 console.log("unexpected error " + e);
             }
@@ -337,14 +299,14 @@ export default class CartView {
     /**
      * Adds juice to cart if addition is valid
      */
-    async #addJuice() {
+    async #addJuice(product: Juice) {
         try {
-            await this.#cartController.addJuice();
+            await this.#cartController.addJuice(product);
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductAdditionException) {
                 this.#errorEl.textContent =
-                    "Orange Juice is unavailable at this time. Try again next time.";
+                    `${product.getName()} is unavailable at this time. Try again next time.`;
             } else {
                 console.log("unexpected error " + e);
             }
@@ -354,13 +316,13 @@ export default class CartView {
     /**
      * Removes Juice from cart if it has been added to cart
      */
-    async #removeJuice() {
+    async #removeJuice(product:Juice) {
         try {
-            await this.#cartController.removeJuice();
+            await this.#cartController.removeJuice(product);
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
-                this.#errorEl.textContent = "Orange Juice has not been added to cart yet!";
+                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!`;
             } else {
                 console.log("unexpected error " + e);
             }
@@ -459,5 +421,61 @@ export default class CartView {
                 console.log("unexpected error " + e);
             }
         }
+    }
+    displayProducts(products: Array<Product>) {
+        const container = document.getElementById("product-container")!;
+        container.innerHTML = "";
+
+        products.forEach((product) => {
+            const div = document.createElement("div");
+            div.className = "drink";
+
+            const imageName = product.getName().replaceAll(" ", "");
+            let type = "";
+
+            if (product instanceof Smoothie) {
+                type = "Smoothie";
+            } else if (product instanceof Juice) {
+                type = "Juice";
+            } else if (product instanceof FrozenYogurt) {
+                type = "Frozen Yogurt";
+            }
+
+            div.innerHTML = `
+            <img src="/images/${imageName}.png" alt="${type}" width="150">
+            <p>${type}</p>
+            <strong>${product.getName()}</strong>
+            <p>$${product.getPrice()}</p>
+            <button class="add-button">Add ${type}</button>
+            <button class="remove-button">Remove ${type}</button>
+        `;
+            const addButton = div.querySelector(".add-button") as HTMLButtonElement;
+            const removeButton = div.querySelector(".remove-button") as HTMLButtonElement;
+
+            if (product instanceof FrozenYogurt) {
+                addButton.addEventListener("click", (event) => {
+                    this.#selectedAddFroyo = product;
+                    const button = event.currentTarget as HTMLElement;
+                    this.#positionDialog(this.#addFroyoDialog, button);
+                    this.#addFroyoDialog.showModal();
+                });
+
+                removeButton.addEventListener("click", (event) => {
+                    this.#selectedRemoveFroyo = product;
+                    const button = event.currentTarget as HTMLElement;
+                    this.#positionDialog(this.#removeFroyoDialog,button);
+                    this.#removeFroyoDialog.showModal();
+                });
+
+            } else if (product instanceof Smoothie) {
+                addButton.addEventListener("click", () => this.#addSmoothie(product));
+                removeButton.addEventListener("click", () => this.#removeSmoothie(product));
+            } else if (product instanceof Juice) {
+                addButton.addEventListener("click", () => this.#addJuice(product));
+                removeButton.addEventListener("click", () => this.#removeJuice(product));
+            }
+
+            container.appendChild(div);
+        });
     }
 }

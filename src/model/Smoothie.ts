@@ -15,6 +15,27 @@ export default class Smoothie extends Product {
 
     }
 
+
+    /**
+     * Gets all smoothies in database based on type
+     * @param type the type of product we want to get product by
+     */
+    static async getSmoothiesByType(type: string): Promise<Array<Smoothie>> {
+        const result = await db().query<{
+            quantity: number;
+            name: string;
+            price: number;
+        }>(
+            "select quantity, name, price from product where product_type = $1",
+            [type]
+        );
+        const allSmoothies = new  Array<Smoothie>();
+        for (let row of result.rows){
+           allSmoothies.push( new Smoothie(row.name, row.price, row.quantity));
+        }
+
+        return allSmoothies;
+    }
     /**
      * Get smoothie from database based on the name
      * @param name the name of smoothie we want to get from database

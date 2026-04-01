@@ -9,6 +9,9 @@ import type Coupon from "./Coupon.ts";
 import type Cart from "./Cart.ts";
 import {assert} from "../assertions.ts";
 import db from "./connection.ts";
+import FrozenYogurt from "./FrozenYogurt.ts";
+import Smoothie from "./Smoothie.ts";
+import Juice from "./Juice.ts";
 
 export default class BOGO implements Coupon {
     #name: string;
@@ -85,13 +88,13 @@ export default class BOGO implements Coupon {
         const quantities = cart.getQuantities();
 
         for (let i = 0; i < items.length; i++) {
-            if (items[i].getName() === "Strawberry Sunshine") {
+            if (items[i] instanceof Smoothie) {
                 smoothie += quantities[i];
                 smoothiePrice = items[i].getPrice();
-            } else if (items[i].getName() === "Orange Juice") {
+            } else if (items[i] instanceof Juice ) {
                 juice += quantities[i];
                 juicePrice = items[i].getPrice();
-            } else if (items[i].getName() === "Vanilla Froyo") {
+            } else if (items[i] instanceof FrozenYogurt) {
                 froyo += quantities[i];
                 froyoPrice = items[i].getPrice();
             }

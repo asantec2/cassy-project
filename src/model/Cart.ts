@@ -61,7 +61,10 @@ export default class Cart {
             currentInCart = this.#quantities[index];
         }
 
-        if (amount <= 0 || product.getQuantity() < currentInCart + amount) {
+        if(amount <= 0  ){
+            throw new InvalidAdditionAmount();
+        }
+        if (product.getQuantity() < currentInCart + amount) {
             throw new InvalidProductAdditionException();
         }
 
@@ -231,6 +234,34 @@ export default class Cart {
     }
 
     /**
+     * Gets product from database based on name of product
+     * @param name the name we want to get product based on
+     */
+    static async getProductByName(name: string): Promise<Product> {
+        const productResults = await db().query<{
+            name: string;
+            product_type: string;
+            quantity: number;
+            price: number;
+        }>(
+            `select name, product_type, quantity, price
+         from product
+         where name = $1`,
+            [name]
+        );
+
+
+        const productRow = productResults.rows[0];
+
+        if (productRow.product_type === "Smoothie") {
+            return new Smoothie(productRow.name, productRow.quantity, productRow.price);
+        } else if (productRow.product_type === "Juice") {
+            return new Juice(productRow.name, productRow.quantity, productRow.price);
+        } else  {
+            return new FrozenYogurt(productRow.name, productRow.quantity, productRow.price);
+        }
+    }
+    /**
      * Gets items from database based on cart_id
      * @param cart_id the cart_id we want to get items based on
      */
@@ -251,22 +282,14 @@ export default class Cart {
 
         for (let i = 0; i < itemResults.rows.length; i++) {
             const itemRow = itemResults.rows[i];
-            const productName = itemRow.product_name;
-            let product: Product;
-
-            if (productName === "Strawberry Sunshine") {
-                product = await Smoothie.getSmoothieByName(productName);
-            } else if (productName === "Orange Juice") {
-                product = await Juice.getJuiceByName(productName);
-            } else {
-                product = await FrozenYogurt.getFroyoByName(productName);
-            }
+            const product = await Cart.getProductByName(itemRow.product_name);
 
             items.push({
                 product: product,
                 quantity: itemRow.quantity
             });
         }
+
 
         return items;
     }
@@ -343,7 +366,10 @@ export default class Cart {
             }
         }
 
-        if (amount <= 0 || index === -1 || this.#quantities[index] < amount) {
+        if(amount <= 0){
+            throw new InvalidRemovalAmount();
+        }
+        if ( index === -1 || this.#quantities[index] < amount) {
             throw new InvalidProductRemovalException();
         }
 
@@ -417,11 +443,11 @@ export default class Cart {
 
             product.reduceQuantity(quantityBought);
 
-            if (product.getName() === "Strawberry Sunshine") {
+            if (product instanceof Smoothie) {
                 await Smoothie.saveProduct(product);
-            } else if (product.getName() === "Orange Juice") {
+            } else if (product instanceof Juice) {
                 await Juice.saveProduct(product);
-            } else if (product.getName() === "Vanilla Froyo") {
+            } else if (product instanceof FrozenYogurt) {
                 await FrozenYogurt.saveProduct(product);
             }
         }
@@ -508,4 +534,10 @@ export class InvalidCouponRemovalException extends Error {
 }
 
 export class OutOfStockException extends Error {
+}
+export class InvalidAdditionAmount extends Error{
+
+}
+export class InvalidRemovalAmount extends Error{
+
 }

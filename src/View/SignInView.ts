@@ -8,7 +8,7 @@ import type CashierController from "../Controller/CashierController.ts";
 import {
     UserNameUnfoundException,
     IncorrectPasswordException
-} from "../Controller/CashierController.ts";
+} from "../model/Cashier.ts";
 import CreateCashierView from "./CreateCashierView.ts";
 
 export default class SignInView {

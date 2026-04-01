@@ -32,6 +32,7 @@ test(' Percent25 throws exception when applied to empty cart', ()=>{
             exception = true;
         } else {
             console.log("unexpected error" + e);
+
         }
     }
     expect(exception).equals(true);

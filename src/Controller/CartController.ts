@@ -22,13 +22,17 @@ export default class CartController {
     // @ts-ignore
     #cartView: CartView;
     #cashier: Cashier;
+    #products: Array<Product>;
 
 
     //constrictor
     constructor(cashier: Cashier, cart: Cart) {
         this.#cashier = cashier;
         this.#cart = cart;
+        this.#products = new Array<Product>();
         this.#cartView = new CartView(this.#cart, this);
+        this.loadProducts();
+
         this.#cartView.notify();
     }
 
@@ -42,6 +46,16 @@ export default class CartController {
         await Cart.saveCart(this.#cart, this.#cashier.getUserName());
 
 
+    }
+    async loadProducts(){
+        const smoothies = await Smoothie.getSmoothiesByType("Smoothie");
+        const juices = await Juice.getJuicesByType("Juice");
+        const frozenYogurts = await FrozenYogurt.getFrozenYogurtsByType("Frozen Yogurt");
+        smoothies.forEach((s) => this.#products.push(s));
+        juices.forEach((j) => this.#products.push(j));
+        frozenYogurts.forEach((f) => this.#products.push(f));
+
+    this.#cartView.displayProducts(this.#products);
     }
 
     /**
@@ -104,17 +118,16 @@ export default class CartController {
     /**
      * Adds smoothie to the cart.
      */
-    async addSmoothie() {
-        const product = await Smoothie.getSmoothieByName("Strawberry Sunshine");
+    async addSmoothie(product:Smoothie) {
         await this.addToCart(product, 1);
+
 
     }
 
     /**
      * Removes Smoothie from the cart.
      */
-    async removeSmoothie() {
-        const product = await Smoothie.getSmoothieByName("Strawberry Sunshine");
+    async removeSmoothie(product:Smoothie) {
         await this.removeFromCart(product, 1);
 
     }
@@ -122,8 +135,7 @@ export default class CartController {
     /**
      * Adds juice to the cart.
      */
-    async addJuice() {
-        const product = await Juice.getJuiceByName("Orange Juice");
+    async addJuice(product:Juice) {
         await this.addToCart(product, 1);
 
     }
@@ -131,8 +143,7 @@ export default class CartController {
     /**
      * Removes Juice from the cart.
      */
-    async removeJuice() {
-        const product = await Juice.getJuiceByName("Orange Juice");
+    async removeJuice(product:Juice) {
         await this.removeFromCart(product, 1);
 
     }
@@ -140,8 +151,7 @@ export default class CartController {
     /**
      * Adds frozen yogurt to the cart.
      */
-    async addFroyo(amount: number) {
-        const product = await FrozenYogurt.getFroyoByName("Vanilla Froyo");
+    async addFroyo(product : FrozenYogurt,amount: number) {
         await this.addToCart(product, amount);
 
     }
@@ -149,8 +159,8 @@ export default class CartController {
     /**
      * Removes Frozen yogurt from the cart.
      */
-    async removeFroyo(amount: number) {
-        const product = await FrozenYogurt.getFroyoByName("Vanilla Froyo");
+    async removeFroyo(product: FrozenYogurt,amount: number) {
+
         await this.removeFromCart(product, amount);
 
     }
@@ -167,9 +177,12 @@ export default class CartController {
     /**
      * Displays the cart view so the user can continue shopping.
      */
-    showCartView() {
-        this.#cartView = new CartView(this.#cart, this);
-    }
+        showCartView() {
+            this.#cartView = new CartView(this.#cart, this);
+            this.#cartView.displayProducts(this.#products);
+            this.#cartView.notify();
+        }
+
 
     getCashier(): Cashier {
         return this.#cashier;

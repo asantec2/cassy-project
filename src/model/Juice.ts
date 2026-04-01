@@ -15,6 +15,28 @@ export default class Juice extends Product {
 
     }
 
+
+    /**
+     * Gets all juices in database based on type
+     * @param type the type of product we want to get product by
+     */
+    static async getJuicesByType(type: string): Promise<Array<Juice>> {
+        const result = await db().query<{
+            quantity: number;
+            name: string;
+            price: number;
+        }>(
+            "select quantity, name, price from product where product_type = $1",
+            [type]
+        );
+
+        const allJuices = new  Array<Juice>();
+        for (let row of result.rows){
+            allJuices.push( new Juice(row.name, row.price, row.quantity));
+        }
+
+        return allJuices;
+    }
     /**
      * Get juice from database based on the name
      * @param name the name of juice we want to get from database

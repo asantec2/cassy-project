@@ -4,7 +4,8 @@
  * and returns to the {@link SignInView} upon successful account creation.
  */
 
-import CashierController, {DuplicateUserNameException} from "../Controller/CashierController.ts";
+import CashierController from "../Controller/CashierController.ts";
+import {DuplicateUserNameException} from "../model/Cashier.ts";
 import {InvalidNumericUsernameException, InvalidPasswordException} from "../model/Cashier.ts";
 import {InvalidUsernameException} from "../model/Cashier.ts";
 
