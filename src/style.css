@@ -34,25 +34,28 @@ body {
     position: relative;
 }
 
-/* Background image */
+/* FIX:
+   changed background from blurred image to purple/yellow gradient */
 body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background-image: url("../images/booster-background.png");
-    background-size: cover;
-    background-position: center;
-    filter: blur(8px);
-    transform: scale(1.05);
+    background:
+            linear-gradient(135deg,
+            #5b2a86 0%,
+            #7b2cbf 25%,
+            #c77dff 45%,
+            #ffd60a 75%,
+            #ffea70 100%);
     z-index: -2;
 }
 
-/* Light overlay */
+/* overlay kept, but slightly softer so gradient shows nicely */
 body::after {
     content: "";
     position: fixed;
     inset: 0;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.18);
     z-index: -1;
 }
 
@@ -92,7 +95,6 @@ button:focus-visible {
     margin: 0 auto;
     padding: 20px;
     text-align: left;
-
 }
 
 /* clear floats */
@@ -169,8 +171,7 @@ button:focus-visible {
 #cart h3,
 #cart ul,
 #cart #error,
-#cart .coupon-section,
-#cart #check-out {
+#cart .coupon-section {
     float: right;
     width: 32%;
     box-sizing: border-box;
@@ -204,18 +205,22 @@ button:focus-visible {
     margin: 8px 0;
 }
 
+/* FIX:
+   made error box keep full red border and wrap long text properly */
 #error {
+    float: right;
+    width: 32%;
     color: red;
     font-weight: bold;
     border: 2px solid red;
-    border-radius: 0;
-    border-top: none;
-    padding: 8px 12px;
-    min-height: 40px;
+    border-radius: 12px;
+    padding: 10px 12px;
+    min-height: 44px;
     margin: 0 0 8px 0;
     text-align: center;
     white-space: normal;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    word-break: break-word;
     box-sizing: border-box;
     background: rgba(255, 255, 255, 0.96);
     display: block;
@@ -251,24 +256,28 @@ button:focus-visible {
     margin-top: 5px;
 }
 
-#check-out {
+/* FIX:
+   both buttons now share the same style and sit on the right side */
+#check-out,
+#open-auto-shop,
+#auto-shop {
     float: right;
-    width: auto;                 /* not full panel width */
+    width: auto;
     margin-top: 10px;
+    margin-left: 10px;
     padding: 10px 18px;
-
-    border-radius: 20px;         /* normal button shape */
+    border-radius: 20px;
     border: none;
-
-    background-color: #646cff;   /* nice button color */
+    background-color: #646cff;
     color: black;
-
     cursor: pointer;
     font-weight: bold;
-
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
-#check-out:hover {
+
+#check-out:hover,
+#open-auto-shop:hover,
+#auto-shop:hover {
     background-color: #535bf2;
 }
 
@@ -276,6 +285,7 @@ button:focus-visible {
 #cart > p:empty {
     display: none;
 }
+
 /* cart table */
 .cart-table {
     width: 100%;

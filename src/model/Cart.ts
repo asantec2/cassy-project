@@ -15,6 +15,8 @@ import Percent25 from "./Percent25.ts";
 import Smoothie from "./Smoothie.ts";
 import Juice from "./Juice.ts";
 import FrozenYogurt from "./FrozenYogurt.ts";
+import {getNextState} from "./MarkovModel.ts";
+
 
 
 export default class Cart {
@@ -24,15 +26,17 @@ export default class Cart {
     #quantities: Array<number>;
     #total: number;
     cart_id?: number;
+    currentProduct: string | null;
 
     //constructor
-    constructor(cartId?: number) {
+    constructor( cartId?: number) {
         this.#items = new Array<Product>();
         this.#listeners = new Array<Listener>();
         this.#coupons = new Array<Coupon>();
         this.#quantities = new Array<number>();
         this.#total = 0;
         this.cart_id = cartId;
+        this.currentProduct = null;
         this.#checkCart();
     }
 
@@ -76,7 +80,9 @@ export default class Cart {
             this.#quantities[index] = this.#quantities[index] + amount;
         }
 
+
         this.calculateTotal();
+        this.currentProduct = product.getName();
         this.#notifyAll();
     }
 
@@ -115,6 +121,52 @@ export default class Cart {
         this.#total = newTotal;
     }
 
+    async autoShop(budget: number,name : string){
+
+        if(budget <= 0 ){
+            throw new InvalidBudgetException();
+        }
+        if(this.currentProduct === null ){
+            throw new InvalidAutoShopCartException();
+        }
+        let remainingBudget = budget;
+        let currentProductName = this.currentProduct;
+        while(remainingBudget > 0) {
+            const nextProductName =  await getNextState(currentProductName);
+            const nextProduct = await this.getProductByName(nextProductName);
+
+            const fixedAmount = 1;
+            const cost = nextProduct.getPrice() * fixedAmount;
+
+            if (cost > remainingBudget) {
+                throw new LowBudgetException();
+            }
+
+            this.addProduct(nextProduct, fixedAmount);
+            await Cart.saveCart(this,name);
+            remainingBudget = remainingBudget - cost;
+            currentProductName = nextProductName;
+        }
+
+
+    }
+    private async getProductByName(name: string): Promise<Product> {
+        const productType = await Product.getProductTypeByName(name);
+        let product : any;
+
+        if (productType === "Smoothie") {
+             product = await Smoothie.getSmoothieByName(name);
+        }else if (productType === "Juice") {
+             product = await Juice.getJuiceByName(name);
+
+        } else {
+             product = await FrozenYogurt.getFroyoByName(name);
+        }
+        return  product;
+    }
+    getCurrentProduct(){
+        return this.currentProduct;
+    }
     /**
      * Save cart by inserting it into database
      * @param cart cart to be saved
@@ -124,19 +176,21 @@ export default class Cart {
         cart.calculateTotal();
 
         let cartId = cart.getCartId();
+        let currentProduct = cart.getCurrentProduct();
+
 
         if (cartId === undefined) {
             const result = await db().query<{ cart_id: number }>(
-                "insert into cart(total,cashier) values ($1,$2) returning cart_id",
-                [cart.getTotal(), username]
+                "insert into cart(total,cashier,current_product) values ($1,$2,$3) returning cart_id",
+                [cart.getTotal(), username,currentProduct]
             );
 
             cartId = result.rows[0].cart_id;
             cart.setCartId(cartId);
         } else {
             await db().query(
-                "update cart set total = $1 where cart_id = $2",
-                [cart.getTotal(), cartId]
+                "update cart set total = $1,current_product = $2 where cart_id = $3",
+                [cart.getTotal(),currentProduct,cartId]
             );
 
             await db().query(
@@ -209,8 +263,9 @@ export default class Cart {
         const result = await db().query<{
             cart_id: number;
             total: number;
+            current_product : string;
         }>(
-            "select cart_id, total from cart where cart_id = $1",
+            "select cart_id, total,current_product from cart where cart_id = $1",
             [cart_id]
         );
 
@@ -218,6 +273,7 @@ export default class Cart {
         const row = result.rows[0];
         const cart = new Cart(row.cart_id);
         cart.setTotal(row.total);
+        cart.setCurrentProduct(row.current_product);
 
         const products = await Cart.getItemsForCart(cart_id);
         for (let i = 0; i < products.length; i++) {
@@ -231,6 +287,9 @@ export default class Cart {
         }
 
         return cart;
+    }
+    setCurrentProduct(name: string| null ){
+        this.currentProduct = name;
     }
 
     /**
@@ -254,11 +313,11 @@ export default class Cart {
         const productRow = productResults.rows[0];
 
         if (productRow.product_type === "Smoothie") {
-            return new Smoothie(productRow.name, productRow.quantity, productRow.price);
+            return new Smoothie(productRow.name, productRow.price,productRow.quantity);
         } else if (productRow.product_type === "Juice") {
-            return new Juice(productRow.name, productRow.quantity, productRow.price);
+            return new Juice(productRow.name, productRow.price, productRow.quantity);
         } else  {
-            return new FrozenYogurt(productRow.name, productRow.quantity, productRow.price);
+            return new FrozenYogurt(productRow.name, productRow.price, productRow.quantity);
         }
     }
     /**
@@ -541,3 +600,10 @@ export class InvalidAdditionAmount extends Error{
 export class InvalidRemovalAmount extends Error{
 
 }
+export class InvalidBudgetException extends Error{
+
+}
+export class InvalidAutoShopCartException extends Error{
+
+}
+export class LowBudgetException extends Error{}

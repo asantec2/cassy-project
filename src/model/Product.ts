@@ -33,17 +33,25 @@ export default abstract class Product {
     static async saveProduct(product: Product): Promise<Product> {
         await db().query(
             `update product
-             set quantity = $1,
-                 price    = $2
-             where name = $3`,
+             set quantity = $1
+             where name = $2`,
             [
                 product.getQuantity(),
-                product.getPrice(),
                 product.getName()
             ]
         );
 
         return product;
+    }
+    static async getProductTypeByName(name: string): Promise<string> {
+        const result = await db().query<{
+            product_type:string
+        }>(
+            "select product_type from product where name = $1",
+            [name]
+        );
+
+        return result.rows[0].product_type;
     }
 
     getPrice(): number {

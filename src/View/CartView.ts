@@ -9,7 +9,8 @@ import Cart, {
     InvalidCouponRemovalException,
     InvalidCartCheckoutException,
     InvalidProductAdditionException,
-    InvalidProductRemovalException, OutOfStockException, InvalidRemovalAmount, InvalidAdditionAmount
+    InvalidProductRemovalException, OutOfStockException, InvalidRemovalAmount, InvalidAdditionAmount,
+    InvalidBudgetException, LowBudgetException, InvalidAutoShopCartException
 } from "../model/Cart.ts";
 import CartController from "../Controller/CartController.ts";
 import {InvalidBOGOApplicationException} from "../model/BOGO.ts";
@@ -18,6 +19,11 @@ import  Smoothie from "../model/Smoothie.ts";
 import Product from "../model/Product.ts";
 import Juice from "../model/Juice.ts";
 import FrozenYogurt from "../model/FrozenYogurt.ts";
+import {
+    InvalidPreviousProductException,
+    NoOutgoingTransitionException,
+    UntrainedMarkovModeException
+} from "../model/MarkovModel.ts";
 
 export default class CartView {
     #cart: Cart;
@@ -29,6 +35,7 @@ export default class CartView {
     #couponEl: HTMLElement;
     #selectedAddFroyo?: FrozenYogurt;
     #selectedRemoveFroyo?: FrozenYogurt;
+    #autoShopDialog: HTMLDialogElement;
 
     //constructor
     constructor(cart: Cart, cartController: CartController) {
@@ -73,6 +80,8 @@ export default class CartView {
 
             <p></p>
             <button id="check-out">Check out</button>
+            <p></p>
+            <button id="open-auto-shop">Auto Shop</button>
         </div>
         `;
 
@@ -84,9 +93,31 @@ export default class CartView {
             <input type="number" id="add-froyo-amount" />
             <button id="add-froyo">Add Froyo</button>
         `;
+        this.#autoShopDialog = document.createElement("dialog");
+        this.#autoShopDialog.id = "auto-shop-dialog";
+        this.#autoShopDialog.innerHTML = `
+            <span id="auto-shop-error"></span><br />
+            <label for="add-budget-amount">Budget amount</label>
+            <input type="number" id="add-budget-amount" />
+            <button id="confirm-auto-shop">Auto Shop</button>
+        `;
+        this.#autoShopDialog.querySelector("#confirm-auto-shop")!
+            .addEventListener("click", async () => {
+                await this.#autoShop();
+            });
+        document.body.appendChild(this.#autoShopDialog);
+
+        document.querySelector("#open-auto-shop")!
+            .addEventListener("click", () => {
+                const openButton = document.querySelector("#open-auto-shop")! as HTMLElement;
+                this.#positionDialog(this.#autoShopDialog, openButton);
+                this.#autoShopDialog.showModal();
+            });
+
         this.#addFroyoDialog.querySelector("button")!
             .addEventListener("click", () => this.#addFroyo());
         document.body.appendChild(this.#addFroyoDialog);
+
 
         this.#removeFroyoDialog = document.createElement("dialog");
         this.#removeFroyoDialog.id = "remove-froyo-dialog";
@@ -220,7 +251,47 @@ export default class CartView {
             }
         }
     }
+    async #autoShop() {
+        const amount = this.#autoShopDialog
+            .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;
 
+        try {
+            await this.#cartController.autoShop(amount);
+            this.#autoShopDialog.querySelector("#auto-shop-error")!.textContent = "";
+            this.#autoShopDialog.querySelector("input[type='number']")!
+                .setAttribute("style", "border-color:;");
+            this.#errorEl.textContent = "";
+            this.#autoShopDialog.close();
+        } catch (e: any) {
+            if (e instanceof InvalidPreviousProductException) {
+                this.#errorEl.textContent =
+                    "Previous product added to cart cannot be used to auto shop. Please add another product to try again.";
+                    this.#autoShopDialog.close();
+            } else if (e instanceof UntrainedMarkovModeException) {
+                this.#errorEl.textContent =
+                    "Model has not been trained. Please train the model and try again.";
+                this.#autoShopDialog.close();
+            } else if (e instanceof NoOutgoingTransitionException) {
+                this.#errorEl.textContent =
+                    "There are no products after the previous added product. Please add another product to try again.";
+                this.#autoShopDialog.close();
+            } else if (e instanceof InvalidBudgetException) {
+                this.#autoShopDialog.querySelector("input[type='number']")!
+                    .setAttribute("style", "border-color:red;");
+                this.#autoShopDialog.querySelector("#auto-shop-error")!
+                    .textContent = "The budget is invalid. Please enter a number greater than 0.";
+            } else if (e instanceof LowBudgetException) {
+                    this.#errorEl.textContent = "The budget is too small to add the next product.";
+                this.#autoShopDialog.close();
+            } else if (e instanceof InvalidAutoShopCartException) {
+                this.#errorEl.textContent =
+                    "There are no products in cart. Please add a product to try again.";
+                     this.#autoShopDialog.close();
+            } else {
+                console.log("unexpected error " + e);
+            }
+        }
+    }
     async #addFroyo() {
         const amount = this.#addFroyoDialog
             .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;

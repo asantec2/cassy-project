@@ -155,6 +155,10 @@ export default class CartController {
         await this.addToCart(product, amount);
 
     }
+    async autoShop(amount: number){
+        await this.#cart.autoShop(amount,this.#cashier.getUserName());
+
+    }
 
     /**
      * Removes Frozen yogurt from the cart.

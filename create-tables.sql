@@ -6,6 +6,7 @@ create table if not exists cart(
     cart_id serial not null unique,
     total integer not null,
     cashier varchar(255) not null unique,
+    current_product varchar(255),
     foreign key (cashier)references cashier(username)
     on delete cascade
 );
