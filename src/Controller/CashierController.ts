@@ -35,7 +35,6 @@ export default class CashierController {
     }
 
 
-
     /**
      * Creates cashier given its username and password
      * @param username the  username of cashier to be created

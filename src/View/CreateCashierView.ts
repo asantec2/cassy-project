@@ -59,25 +59,25 @@ export default class CreateCashierView {
 
             if (e instanceof DuplicateUserNameException) {
                 this.#dialog.querySelector("#error")!.textContent =
-                    "Username already exists. Please try again";
+                    "Username already exists. Please try a different username";
 
             } else if (e instanceof InvalidUsernameException) {
                 this.#dialog.querySelector("input[type='text']")!
                     .setAttribute("style", "border-color:red;");
                 this.#dialog.querySelector("#error")!.textContent =
-                    "Invalid username.Please try again";
+                    "Invalid username.Please enter a username with at least one character to 15 characters.";
 
             } else if (e instanceof InvalidPasswordException) {
                 this.#dialog.querySelector("input[type='password']")!
                     .setAttribute("style", "border-color:red;");
                 this.#dialog.querySelector("#error")!.textContent =
-                    "Invalid password.Please try again";
+                    "Invalid password.Please enter a password with at least one character";
 
             }else if(e instanceof  InvalidNumericUsernameException){
                 this.#dialog.querySelector("input[type='text']")!
                     .setAttribute("style", "border-color:red;");
                 this.#dialog.querySelector("#error")!.textContent =
-                    "Invalid numeric username.Please try again";
+                    "Invalid numeric username.Please enter username without numbers";
             } else {
                 console.error(e);
             }

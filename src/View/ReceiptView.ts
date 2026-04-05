@@ -44,7 +44,7 @@ export default class ReceiptView {
     <strong>Thank you for your purchase!</strong>
     <p></p>
 
-    <button id="back-to-cart">Back to cart</button>
+    <button id="back-to-cart">Return to cart</button>
 </div>
 `;
 

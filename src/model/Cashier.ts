@@ -3,12 +3,10 @@ import {assert} from "../assertions.ts";
 import db from './connection.ts'
 
 
-
 export default class Cashier {
     #username: string;
     #password: string;
     #receipts: Array<Receipt>;
-
 
 
     //constructor
@@ -47,6 +45,7 @@ export default class Cashier {
         return cashier
 
     }
+
     async #verifyPassword(password: string): Promise<boolean> {
         const hashedPassword = await Cashier.#hashPassword(password, this.#username);
         return this.#password === hashedPassword;
@@ -108,12 +107,13 @@ export default class Cashier {
     addReceipt(receipt: Receipt) {
         this.#receipts.push(receipt);
     }
+
     /**
      * Converts an ArrayBuffer into a hexadecimal string.
      * @param buffer the ArrayBuffer to convert
      * @returns the hexadecimal string
      */
-     static bytesToHex(buffer: ArrayBuffer): string {
+    static bytesToHex(buffer: ArrayBuffer): string {
         const bytes = new Uint8Array(buffer);
         let hex = "";
 
@@ -123,6 +123,7 @@ export default class Cashier {
 
         return hex;
     }
+
     /**
      * Hashes a password using PBKDF2 and the username as the salt.
      * @param password the plain text password
@@ -137,7 +138,7 @@ export default class Cashier {
         const keyMaterial = await crypto.subtle.importKey(
             "raw",
             passwordBytes,
-            { name: "PBKDF2" },
+            {name: "PBKDF2"},
             false,
             ["deriveBits"]
         );
@@ -155,6 +156,12 @@ export default class Cashier {
 
         return Cashier.bytesToHex(derivedBits);
     }
+
+    /**
+     * Verify sign in so make sure credentials are correct
+     * @param username the username given to be verified
+     * @param password the password given to be verified
+     */
     static async verifySignIn(username: string, password: string): Promise<Cashier> {
         const cashier = await Cashier.getCashierByUsername(username);
 
@@ -170,26 +177,12 @@ export default class Cashier {
 
         return cashier;
     }
+
     /**
-     * Sign cashier into account based on username and password
-     * @param username the username of cashier to be signed in
-     * @param password the password of cashier to be signed in
+     * Create a new cashier account
+     * @param username the username of cashier account to be created
+     * @param password the password of cashier account to be created
      */
-    async signIn(username: string, password: string) :Promise<Cashier> {
-        const cashier = await Cashier.getCashierByUsername(username);
-
-        if (cashier === null) {
-            throw new UserNameUnfoundException();
-        }
-
-        const hashedPassword = await Cashier.#hashPassword(password, username);
-
-        if (cashier.getPassword() !== hashedPassword) {
-            throw new IncorrectPasswordException();
-        }
-
-        return  cashier;
-    }
     static async createNewCashier(username: string, password: string): Promise<Cashier> {
         const existingCashier = await Cashier.getCashierByUsername(username);
 
@@ -213,6 +206,7 @@ export class InvalidPasswordException extends Error {
 
 export class InvalidNumericUsernameException extends Error {
 }
+
 export class DuplicateUserNameException extends Error {
 }
 

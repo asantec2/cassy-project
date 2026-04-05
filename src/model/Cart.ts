@@ -18,7 +18,6 @@ import FrozenYogurt from "./FrozenYogurt.ts";
 import {getNextState} from "./MarkovModel.ts";
 
 
-
 export default class Cart {
     #items: Array<Product>
     #listeners: Array<Listener>;
@@ -29,7 +28,7 @@ export default class Cart {
     currentProduct: string | null;
 
     //constructor
-    constructor( cartId?: number) {
+    constructor(cartId?: number) {
         this.#items = new Array<Product>();
         this.#listeners = new Array<Listener>();
         this.#coupons = new Array<Coupon>();
@@ -65,7 +64,7 @@ export default class Cart {
             currentInCart = this.#quantities[index];
         }
 
-        if(amount <= 0  ){
+        if (amount <= 0) {
             throw new InvalidAdditionAmount();
         }
         if (product.getQuantity() < currentInCart + amount) {
@@ -121,18 +120,23 @@ export default class Cart {
         this.#total = newTotal;
     }
 
-    async autoShop(budget: number,name : string){
+    /**
+     * Add products to cart based on budget and model from training data
+     * @param budget the budget for addition of products
+     * @param name of the cashier for cart
+     */
+    async autoShop(budget: number, name: string) {
 
-        if(budget <= 0 ){
+        if (budget <= 0) {
             throw new InvalidBudgetException();
         }
-        if(this.currentProduct === null ){
+        if (this.currentProduct === null) {
             throw new InvalidAutoShopCartException();
         }
         let remainingBudget = budget;
         let currentProductName = this.currentProduct;
-        while(remainingBudget > 0) {
-            const nextProductName =  await getNextState(currentProductName);
+        while (remainingBudget > 0) {
+            const nextProductName = await getNextState(currentProductName);
             const nextProduct = await this.getProductByName(nextProductName);
 
             const fixedAmount = 1;
@@ -143,30 +147,37 @@ export default class Cart {
             }
 
             this.addProduct(nextProduct, fixedAmount);
-            await Cart.saveCart(this,name);
+            await Cart.saveCart(this, name);
             remainingBudget = remainingBudget - cost;
             currentProductName = nextProductName;
         }
 
 
     }
-    private async getProductByName(name: string): Promise<Product> {
+
+    /**
+     * Get product from database based on the name of the product
+     * @param name the name to get product based on
+     */
+    async getProductByName(name: string): Promise<Product> {
         const productType = await Product.getProductTypeByName(name);
-        let product : any;
+        let product: any;
 
         if (productType === "Smoothie") {
-             product = await Smoothie.getSmoothieByName(name);
-        }else if (productType === "Juice") {
-             product = await Juice.getJuiceByName(name);
+            product = await Smoothie.getSmoothieByName(name);
+        } else if (productType === "Juice") {
+            product = await Juice.getJuiceByName(name);
 
         } else {
-             product = await FrozenYogurt.getFroyoByName(name);
+            product = await FrozenYogurt.getFroyoByName(name);
         }
-        return  product;
+        return product;
     }
-    getCurrentProduct(){
+
+    getCurrentProduct() {
         return this.currentProduct;
     }
+
     /**
      * Save cart by inserting it into database
      * @param cart cart to be saved
@@ -182,7 +193,7 @@ export default class Cart {
         if (cartId === undefined) {
             const result = await db().query<{ cart_id: number }>(
                 "insert into cart(total,cashier,current_product) values ($1,$2,$3) returning cart_id",
-                [cart.getTotal(), username,currentProduct]
+                [cart.getTotal(), username, currentProduct]
             );
 
             cartId = result.rows[0].cart_id;
@@ -190,7 +201,7 @@ export default class Cart {
         } else {
             await db().query(
                 "update cart set total = $1,current_product = $2 where cart_id = $3",
-                [cart.getTotal(),currentProduct,cartId]
+                [cart.getTotal(), currentProduct, cartId]
             );
 
             await db().query(
@@ -263,7 +274,7 @@ export default class Cart {
         const result = await db().query<{
             cart_id: number;
             total: number;
-            current_product : string;
+            current_product: string;
         }>(
             "select cart_id, total,current_product from cart where cart_id = $1",
             [cart_id]
@@ -288,7 +299,8 @@ export default class Cart {
 
         return cart;
     }
-    setCurrentProduct(name: string| null ){
+
+    setCurrentProduct(name: string | null) {
         this.currentProduct = name;
     }
 
@@ -304,8 +316,8 @@ export default class Cart {
             price: number;
         }>(
             `select name, product_type, quantity, price
-         from product
-         where name = $1`,
+             from product
+             where name = $1`,
             [name]
         );
 
@@ -313,13 +325,14 @@ export default class Cart {
         const productRow = productResults.rows[0];
 
         if (productRow.product_type === "Smoothie") {
-            return new Smoothie(productRow.name, productRow.price,productRow.quantity);
+            return new Smoothie(productRow.name, productRow.price, productRow.quantity);
         } else if (productRow.product_type === "Juice") {
             return new Juice(productRow.name, productRow.price, productRow.quantity);
-        } else  {
+        } else {
             return new FrozenYogurt(productRow.name, productRow.price, productRow.quantity);
         }
     }
+
     /**
      * Gets items from database based on cart_id
      * @param cart_id the cart_id we want to get items based on
@@ -425,10 +438,10 @@ export default class Cart {
             }
         }
 
-        if(amount <= 0){
+        if (amount <= 0) {
             throw new InvalidRemovalAmount();
         }
-        if ( index === -1 || this.#quantities[index] < amount) {
+        if (index === -1 || this.#quantities[index] < amount) {
             throw new InvalidProductRemovalException();
         }
 
@@ -517,6 +530,7 @@ export default class Cart {
         this.#items = new Array<Product>();
         this.#quantities = new Array<number>();
         this.setTotal(0);
+        this.setCurrentProduct(null);
 
         await Cart.saveCart(this, cashier.getUserName());
 
@@ -594,16 +608,22 @@ export class InvalidCouponRemovalException extends Error {
 
 export class OutOfStockException extends Error {
 }
-export class InvalidAdditionAmount extends Error{
+
+export class InvalidAdditionAmount extends Error {
 
 }
-export class InvalidRemovalAmount extends Error{
+
+export class InvalidRemovalAmount extends Error {
 
 }
-export class InvalidBudgetException extends Error{
+
+export class InvalidBudgetException extends Error {
 
 }
-export class InvalidAutoShopCartException extends Error{
+
+export class InvalidAutoShopCartException extends Error {
 
 }
-export class LowBudgetException extends Error{}
+
+export class LowBudgetException extends Error {
+}

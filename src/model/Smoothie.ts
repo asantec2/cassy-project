@@ -8,7 +8,6 @@ import db from "./connection.ts"
 export default class Smoothie extends Product {
 
 
-
     //constructor
     constructor(name: string, price: number, quantity: number) {
         super(name, price, quantity);
@@ -29,13 +28,14 @@ export default class Smoothie extends Product {
             "select quantity, name, price from product where product_type = $1",
             [type]
         );
-        const allSmoothies = new  Array<Smoothie>();
-        for (let row of result.rows){
-           allSmoothies.push( new Smoothie(row.name, row.price, row.quantity));
+        const allSmoothies = new Array<Smoothie>();
+        for (let row of result.rows) {
+            allSmoothies.push(new Smoothie(row.name, row.price, row.quantity));
         }
 
         return allSmoothies;
     }
+
     /**
      * Get smoothie from database based on the name
      * @param name the name of smoothie we want to get from database

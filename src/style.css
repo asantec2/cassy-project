@@ -42,11 +42,11 @@ body::before {
     inset: 0;
     background:
             linear-gradient(135deg,
-            #5b2a86 0%,
-            #7b2cbf 25%,
-            #c77dff 45%,
-            #ffd60a 75%,
-            #ffea70 100%);
+            #4e098a 0%,
+            #2b054a 25%,
+            #481271 45%,
+            #8c0a67 75%,
+            #dcad14 100%);
     z-index: -2;
 }
 
@@ -125,7 +125,7 @@ button:focus-visible {
 #drink-images {
     float: left;
     width: 64%;
-    background: rgba(255, 255, 255, 0.94);
+    background: rgb(255, 255, 255);
     border-radius: 16px;
     padding: 18px;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
@@ -141,7 +141,7 @@ button:focus-visible {
 
 #product-container > div,
 .drink {
-    background-color: #fff;
+    background-color: #ffffff;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 8px;

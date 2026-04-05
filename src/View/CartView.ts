@@ -251,6 +251,10 @@ export default class CartView {
             }
         }
     }
+
+    /**
+     * Adds several different products to cart based on budget given
+     */
     async #autoShop() {
         const amount = this.#autoShopDialog
             .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;
@@ -287,11 +291,20 @@ export default class CartView {
                 this.#errorEl.textContent =
                     "There are no products in cart. Please add a product to try again.";
                      this.#autoShopDialog.close();
-            } else {
-                console.log("unexpected error " + e);
+            } else if (e instanceof InvalidProductAdditionException) {
+                this.#errorEl.textContent = `Next product to be added to Cart is currently unavailable.Please try again next time`;
+                this.#autoShopDialog.close();
+            }
+
+            else {
+                console.log("unexpected error " , e);
             }
         }
     }
+
+    /**
+     *Adds frozen yogurt to cart if addition is valid
+     */
     async #addFroyo() {
         const amount = this.#addFroyoDialog
             .querySelector<HTMLInputElement>("input[type='number']")!.valueAsNumber;
@@ -343,7 +356,7 @@ export default class CartView {
                     `Invalid ${this.#selectedRemoveFroyo!.getName()} amount. Please enter a number greater than 0.`;
             } else if (e instanceof InvalidProductRemovalException) {
                 this.#errorEl.textContent =
-                    `${this.#selectedRemoveFroyo!.getName()} has not been added to cart!`;
+                    `${this.#selectedRemoveFroyo!.getName()} has not been added to cart! Please add product before removal`;
                     this.#removeFroyoDialog.close();
             } else {
                 console.log("unexpected error " + e);
@@ -360,7 +373,7 @@ export default class CartView {
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
-                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!`;
+                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!Please add product before removal`;
             } else {
                 console.log("unexpected error " + e);
             }
@@ -393,7 +406,7 @@ export default class CartView {
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
-                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!`;
+                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!Please add product before removal`;
             } else {
                 console.log("unexpected error " + e);
             }
@@ -434,7 +447,7 @@ export default class CartView {
            this.notify();
         } catch (e: any) {
             if (e instanceof InvalidCouponAdditionException) {
-                this.#errorEl.textContent = "BOGO has already been added to the cart!";
+                this.#errorEl.textContent = "BOGO has already been added to the cart and cannot be added twice!";
             } else {
                 console.log("unexpected error " + e);
             }
@@ -451,7 +464,7 @@ export default class CartView {
             this.notify();
         } catch (e: any) {
             if (e instanceof InvalidCouponRemovalException) {
-                this.#errorEl.textContent = "BOGO has not been added to the cart!";
+                this.#errorEl.textContent = "BOGO has not been added to the cart!Please add BOGO coupon before removal";
             } else {
                 console.log("unexpected error " + e);
             }
@@ -469,7 +482,7 @@ export default class CartView {
         } catch (e: any) {
             if (e instanceof InvalidCouponAdditionException) {
                 this.#errorEl.textContent =
-                    "25% OFF coupon has already been added to the cart!";
+                    "25% OFF coupon has already been added to the cart and cannot be added twice!";
             } else {
                 console.log("unexpected error " + e);
             }
@@ -487,12 +500,17 @@ export default class CartView {
         } catch (e: any) {
             if (e instanceof InvalidCouponRemovalException) {
                 this.#errorEl.textContent =
-                    "25% OFF coupon has not been added to the cart!";
+                    "25% OFF coupon has not been added to the cart!Please add 25% coupon before removal";
             } else {
                 console.log("unexpected error " + e);
             }
         }
     }
+
+    /**
+     * Display all products in the store for purchase
+     * @param products the products instore to be displayed
+     */
     displayProducts(products: Array<Product>) {
         const container = document.getElementById("product-container")!;
         container.innerHTML = "";

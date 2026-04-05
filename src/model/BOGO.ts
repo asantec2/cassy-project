@@ -91,7 +91,7 @@ export default class BOGO implements Coupon {
             if (items[i] instanceof Smoothie) {
                 smoothie += quantities[i];
                 smoothiePrice = items[i].getPrice();
-            } else if (items[i] instanceof Juice ) {
+            } else if (items[i] instanceof Juice) {
                 juice += quantities[i];
                 juicePrice = items[i].getPrice();
             } else if (items[i] instanceof FrozenYogurt) {

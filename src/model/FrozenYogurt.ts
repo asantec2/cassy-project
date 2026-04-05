@@ -31,9 +31,9 @@ export default class FrozenYogurt extends Product {
             [type]
         );
 
-        const allFrozenYogurt = new  Array<FrozenYogurt>();
-        for (let row of result.rows){
-            allFrozenYogurt.push( new FrozenYogurt(row.name, row.price, row.quantity));
+        const allFrozenYogurt = new Array<FrozenYogurt>();
+        for (let row of result.rows) {
+            allFrozenYogurt.push(new FrozenYogurt(row.name, row.price, row.quantity));
         }
 
 

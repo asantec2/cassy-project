@@ -59,10 +59,10 @@ export default class SignInView {
         } catch (e: any) {
             if (e instanceof UserNameUnfoundException) {
                 this.#dialog.querySelector<HTMLInputElement>("input[type='text']")!.setAttribute("style", "border-color:red;");
-                this.#dialog.querySelector("#error")!.textContent = "Username not found. Please try again.";
+                this.#dialog.querySelector("#error")!.textContent = "Username not found. Please enter a valid username.";
             } else if (e instanceof IncorrectPasswordException) {
                 this.#dialog.querySelector<HTMLInputElement>("input[type='password']")!.setAttribute("style", "border-color:red;");
-                this.#dialog.querySelector("#error")!.textContent = "Incorrect password. Please try again.";
+                this.#dialog.querySelector("#error")!.textContent = "Incorrect password. Please enter correct password.";
             } else {
                 console.log("unexpected error " + e);
             }

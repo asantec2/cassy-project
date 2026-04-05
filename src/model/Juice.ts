@@ -30,13 +30,14 @@ export default class Juice extends Product {
             [type]
         );
 
-        const allJuices = new  Array<Juice>();
-        for (let row of result.rows){
-            allJuices.push( new Juice(row.name, row.price, row.quantity));
+        const allJuices = new Array<Juice>();
+        for (let row of result.rows) {
+            allJuices.push(new Juice(row.name, row.price, row.quantity));
         }
 
         return allJuices;
     }
+
     /**
      * Get juice from database based on the name
      * @param name the name of juice we want to get from database

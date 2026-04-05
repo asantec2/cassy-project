@@ -43,9 +43,10 @@ export default abstract class Product {
 
         return product;
     }
+
     static async getProductTypeByName(name: string): Promise<string> {
         const result = await db().query<{
-            product_type:string
+            product_type: string
         }>(
             "select product_type from product where name = $1",
             [name]
