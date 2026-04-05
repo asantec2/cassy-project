@@ -1,14 +1,28 @@
+/**
+ * The {@code training} class is responsible for building a Markov chain model
+ * from a CSV dataset of product transitions.
+ *
+ * It reads sequences of product labels (a–j) and records how often one product
+ * follows another, storing this information as transition counts.
+ */
+
 import * as fs from "node:fs";
 
 export default class training {
 
 
 
+    /**
+     * Maps product labels (a–j) to indices used in the transition matrix.
+     */
     labelIndexMap: Record<string, number> = {
         a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6, h: 7, i: 8, j: 9
 
     };
 
+    /**
+     * Maps product labels to their full product names.
+     */
     labelProductMap: Record<string, string> = {
         a: "Red Sunrise",
         b: "Mango Hurricane",
@@ -22,6 +36,10 @@ export default class training {
         j: "Canadian Colada"
 
     };
+
+    /**
+     * List of all product names in index order.
+     */
      products: string[] = ["Red Sunrise",
         "Mango Hurricane",
         "Strawberry Froyo",
@@ -58,6 +76,11 @@ export default class training {
             this.denominators[i] = 0;
         }
     }
+    /**
+     * Trains the Markov model using a CSV file.
+     * The method counts transitions between consecutive products.
+     * @param filePath the path to the training CSV file
+     */
     train(filePath: string): void {
         const csvText = fs.readFileSync(filePath, "utf-8");
         const lines = csvText.trim().split("\n");
@@ -84,7 +107,12 @@ export default class training {
         }
     }
 
-    // save model to JSON
+    /**
+     * Saves the trained Markov model to a JSON file.
+     * The file contains transition counts and metadata needed
+     * for prediction.
+     * @param filePath the file path where the model will be saved
+     */
     saveModel(filePath: string): void {
         const model = {
             numerators: this.numerators,
@@ -97,7 +125,9 @@ export default class training {
     }
 
 }
+/**
+ * Executes training and saves the model.
+ */
 const trainer = new training();
-
 trainer.train("./Training/training.csv");
 trainer.saveModel("model.json");

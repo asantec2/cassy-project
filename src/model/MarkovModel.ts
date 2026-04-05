@@ -1,4 +1,12 @@
+/**
+ * The {@code MarkovModel} type represents a trained Markov chain used
+ * to predict the next product based on previous purchases.
+ *
+ */
 import seedrandom from "seedrandom";
+/**
+ * Structure of the trained model loaded from model.json.
+ */
 export type MarkovModel = {
     numerators: number[][];
     denominators: number[];
@@ -9,6 +17,10 @@ export type MarkovModel = {
 let model: MarkovModel;
 const rng = seedrandom("auto-shopper-seed");
 
+/**
+ * Loads the Markov model from model.json.
+ * @returns the loaded Markov model
+ */
 export default async function markovModel(): Promise<MarkovModel> {
     if(!model){
         const response = await fetch("/model.json");
@@ -19,6 +31,12 @@ export default async function markovModel(): Promise<MarkovModel> {
     }
     return model;
 }
+/**
+ * Determines the next product based on the current product
+ * using weighted random selection.
+ * @param productName the current product
+ * @returns the next product name
+ */
 export async function  getNextState( productName: string) :Promise<string> {
      let model = await markovModel();
     const currentIndex =  model.products.indexOf(productName);
