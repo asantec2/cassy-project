@@ -49,7 +49,9 @@ export async function  getNextState( productName: string) :Promise<string> {
         throw new NoOutgoingTransitionException();
     }
 
+    console.log(productName);
     const randomNumber =  Math.floor(rng() * denominator) + 1;
+    console.log(randomNumber);
 
     let sum = 0;
     let nextProduct;
@@ -61,6 +63,7 @@ export async function  getNextState( productName: string) :Promise<string> {
             nextProduct = model.products[i];
         }
     }
+    console.log(nextProduct);
 
 
     // @ts-ignore

@@ -93,7 +93,7 @@ class 25Percent{
 class Cashier{
     -~string username 
     -~string password 
-    -~Array~Receipt~ receipts
+    - Array~Receipt~ receipts
     -~Cart cart
     
     +getReceipts() Array~Receipt~

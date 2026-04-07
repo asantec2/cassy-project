@@ -110,7 +110,7 @@ button:focus-visible {
     font-weight: bold;
     text-align: center;
     margin: 0 0 18px 0;
-    color: #333;
+    color: #ffffff;
     clear: both;
 }
 
@@ -278,14 +278,16 @@ button:focus-visible {
 #check-out:hover,
 #open-auto-shop:hover,
 #auto-shop:hover {
-    background-color: #535bf2;
+    background-color: #ffffff;
 }
 
 /* remove the empty paragraph gap before checkout */
 #cart > p:empty {
     display: none;
 }
-
+#receipt {
+    color: white;
+}
 /* cart table */
 .cart-table {
     width: 100%;
@@ -373,7 +375,7 @@ button:focus-visible {
 .welcome-subtext {
     text-align: center;
     font-size: 14px;
-    color: gray;
+    color: #ffffff;
     margin-bottom: 10px;
 }
 
@@ -426,4 +428,7 @@ pglite-repl {
     width: 100%;
     height: 100%;
     display: block;
+}
+#cart h2{
+    color: white;
 }
