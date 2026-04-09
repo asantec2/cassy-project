@@ -6,12 +6,8 @@ import markovModel from "./model/MarkovModel.ts";
 
 db().exec(ddl);
 new CashierController();
-async function main()
-    {
-        const model = await markovModel();
-        console.log(model);
-}
-main();
+markovModel();
+
 
 
 

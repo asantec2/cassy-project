@@ -40,13 +40,12 @@ body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background:
-            linear-gradient(135deg,
-            #4e098a 0%,
-            #2b054a 25%,
-            #481271 45%,
-            #8c0a67 75%,
-            #dcad14 100%);
+    background: linear-gradient(135deg,
+    #4e098a 0%,
+    #2b054a 25%,
+    #481271 45%,
+    #8c0a67 75%,
+    #dcad14 100%);
     z-index: -2;
 }
 
@@ -208,6 +207,26 @@ button:focus-visible {
 /* FIX:
    made error box keep full red border and wrap long text properly */
 #error {
+
+    width: 80%;
+    max-width: 320px;
+    color: red;
+    font-weight: bold;
+    border: 2px solid red;
+    border-radius: 12px;
+    padding: 10px 12px;
+    min-height: 44px;
+    margin: 10px auto;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.96);
+    display: block;
+}
+
+#cart_error {
     float: right;
     width: 32%;
     color: red;
@@ -227,6 +246,9 @@ button:focus-visible {
 }
 
 #error:empty {
+    display: none;
+}
+#cart_error:empty{
     display: none;
 }
 
@@ -272,7 +294,7 @@ button:focus-visible {
     color: black;
     cursor: pointer;
     font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 #check-out:hover,
@@ -285,9 +307,11 @@ button:focus-visible {
 #cart > p:empty {
     display: none;
 }
+
 #receipt {
     color: white;
 }
+
 /* cart table */
 .cart-table {
     width: 100%;
@@ -375,7 +399,7 @@ button:focus-visible {
 .welcome-subtext {
     text-align: center;
     font-size: 14px;
-    color: #ffffff;
+    color: #0e0101;
     margin-bottom: 10px;
 }
 
@@ -399,7 +423,10 @@ button:focus-visible {
     color: red;
     text-align: center;
 }
-
+.cart_error-text{
+    color: red;
+    text-align: center;
+}
 #add-froyo-dialog,
 #remove-froyo-dialog {
     position: absolute;
@@ -429,6 +456,7 @@ pglite-repl {
     height: 100%;
     display: block;
 }
-#cart h2{
+
+#cart h2 {
     color: white;
 }

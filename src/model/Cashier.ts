@@ -17,9 +17,7 @@ export default class Cashier {
         if (/^[0-9]+$/.test(username)) {
             throw new InvalidNumericUsernameException();
         }
-        if (password.length === 0) {
-            throw new InvalidPasswordException();
-        }
+
         this.#username = username;
         this.#password = password;
         this.#receipts = new Array<Receipt>();
@@ -190,6 +188,9 @@ export default class Cashier {
             throw new DuplicateUserNameException();
         }
 
+        if (password.length === 0) {
+            throw new InvalidPasswordException();
+        }
         const hashedPassword = await Cashier.#hashPassword(password, username);
         const cashier = new Cashier(username, hashedPassword);
 

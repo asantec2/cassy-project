@@ -4,6 +4,9 @@
  *
  */
 import seedrandom from "seedrandom";
+import modelJson from "../../model.json?raw";
+
+
 /**
  * Structure of the trained model loaded from model.json.
  */
@@ -21,13 +24,9 @@ const rng = seedrandom("auto-shopper-seed");
  * Loads the Markov model from model.json.
  * @returns the loaded Markov model
  */
-export default async function markovModel(): Promise<MarkovModel> {
-    if(!model){
-        const response = await fetch("/model.json");
-        if (!response.ok) {
-            throw new UntrainedMarkovModeException();
-        }
-        model = await response.json();
+export default  function markovModel() {
+    if (!model) {
+        model = JSON.parse(modelJson) as MarkovModel;
     }
     return model;
 }
@@ -38,7 +37,7 @@ export default async function markovModel(): Promise<MarkovModel> {
  * @returns the next product name
  */
 export async function  getNextState( productName: string) :Promise<string> {
-     let model = await markovModel();
+     let model =  markovModel();
     const currentIndex =  model.products.indexOf(productName);
 
     if(currentIndex === -1){
@@ -49,9 +48,9 @@ export async function  getNextState( productName: string) :Promise<string> {
         throw new NoOutgoingTransitionException();
     }
 
-    console.log(productName);
+
     const randomNumber =  Math.floor(rng() * denominator) + 1;
-    console.log(randomNumber);
+
 
     let sum = 0;
     let nextProduct;
@@ -63,7 +62,7 @@ export async function  getNextState( productName: string) :Promise<string> {
             nextProduct = model.products[i];
         }
     }
-    console.log(nextProduct);
+
 
 
     // @ts-ignore

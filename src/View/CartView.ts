@@ -58,7 +58,7 @@ export default class CartView {
             <h3>Cart</h3>
             <ul></ul>
             
-            <span id="error"></span><br />
+            <span id="cart_error"></span><br />
 
             <div class="coupon-section">
                 <h3>Coupons</h3>
@@ -137,7 +137,7 @@ export default class CartView {
         document.body.appendChild(this.#removeFroyoDialog);
 
         this.#teamEl = document.querySelector("#cart > ul")!;
-        this.#errorEl = document.querySelector("#error")! as HTMLSpanElement;
+        this.#errorEl = document.querySelector("#cart_error")! as HTMLSpanElement;
         this.#teamEl.appendChild(this.#couponEl);
 
 
@@ -292,7 +292,7 @@ export default class CartView {
                     "There are no products in cart. Please add a product to try again.";
                      this.#autoShopDialog.close();
             } else if (e instanceof InvalidProductAdditionException) {
-                this.#errorEl.textContent = `Next product to be added to Cart is currently unavailable.Please try again next time`;
+                this.#errorEl.textContent = `Next product to be added to Cart is currently unavailable.Please try again next time.`;
                 this.#autoShopDialog.close();
             }
 
@@ -326,6 +326,7 @@ export default class CartView {
             } else if (e instanceof InvalidProductAdditionException) {
                 this.#errorEl.textContent =
                     `${this.#selectedAddFroyo!.getName()} is unavailable at this time. Try again next time.`;
+                     this.#addFroyoDialog.close();
 
             } else {
                 console.log("unexpected error " + e);
@@ -356,7 +357,7 @@ export default class CartView {
                     `Invalid ${this.#selectedRemoveFroyo!.getName()} amount. Please enter a number greater than 0.`;
             } else if (e instanceof InvalidProductRemovalException) {
                 this.#errorEl.textContent =
-                    `${this.#selectedRemoveFroyo!.getName()} has not been added to cart! Please add product before removal`;
+                    `${this.#selectedRemoveFroyo!.getName()} has not been added to cart! Please add product before removal.`;
                     this.#removeFroyoDialog.close();
             } else {
                 console.log("unexpected error " + e);
@@ -373,7 +374,7 @@ export default class CartView {
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
-                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!Please add product before removal`;
+                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet! Please add product before removal.`;
             } else {
                 console.log("unexpected error " + e);
             }
@@ -406,7 +407,7 @@ export default class CartView {
             this.#errorEl.textContent = "";
         } catch (e: any) {
             if (e instanceof InvalidProductRemovalException) {
-                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet!Please add product before removal`;
+                this.#errorEl.textContent = `${product.getName()} has not been added to cart yet! Please add product before removal.`;
             } else {
                 console.log("unexpected error " + e);
             }
@@ -430,7 +431,7 @@ export default class CartView {
                 this.#errorEl.textContent =
                     "25 percent cannot be applied. Add items before checking out.";
             } else if (e instanceof OutOfStockException) {
-                this.#errorEl.textContent = " Some items in cart are now currently out of stock ";
+                this.#errorEl.textContent = " Some items in cart are now currently out of stock.Please remove them before checking out. ";
             } else {
                 console.log("unexpected error " + e);
             }
@@ -464,7 +465,7 @@ export default class CartView {
             this.notify();
         } catch (e: any) {
             if (e instanceof InvalidCouponRemovalException) {
-                this.#errorEl.textContent = "BOGO has not been added to the cart!Please add BOGO coupon before removal";
+                this.#errorEl.textContent = "BOGO has not been added to the cart! Please add BOGO coupon before removal.";
             } else {
                 console.log("unexpected error " + e);
             }
