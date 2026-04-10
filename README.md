@@ -31,7 +31,7 @@ npx ts-node ./Training/training.ts
 Builds a Markov transition model based on product sequences
 Saves the trained model to a file
 
-After training completes, the output file is created at:
+After training completes, the output file is created into the file :
 ```bash
 model.json
 ```
