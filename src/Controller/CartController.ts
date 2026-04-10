@@ -22,16 +22,14 @@ export default class CartController {
     // @ts-ignore
     #cartView: CartView;
     #cashier: Cashier;
-    #products: Array<Product>;
 
 
     //constrictor
     constructor(cashier: Cashier, cart: Cart) {
         this.#cashier = cashier;
         this.#cart = cart;
-        this.#products = new Array<Product>();
         this.#cartView = new CartView(this.#cart, this);
-        this.loadProducts();
+        this.loadInventory();
 
         this.#cartView.notify();
     }
@@ -47,20 +45,24 @@ export default class CartController {
 
 
     }
-
+    async loadInventory(){
+        this.#cartView.displayProducts(await Cart.loadProducts());
+    }
     /**
      * Load all products in store(database) to be displayed on screen for purchase
      */
-    async loadProducts() {
-        const smoothies = await Smoothie.getSmoothiesByType("Smoothie");
-        const juices = await Juice.getJuicesByType("Juice");
-        const frozenYogurts = await FrozenYogurt.getFrozenYogurtsByType("Frozen Yogurt");
-        smoothies.forEach((s) => this.#products.push(s));
-        juices.forEach((j) => this.#products.push(j));
-        frozenYogurts.forEach((f) => this.#products.push(f));
+    //async loadProducts():Promise<Array<Product>> {
+        //let products = new Array<Product>();
+        //const smoothies = await Smoothie.getSmoothiesByType("Smoothie");
+        //const juices = await Juice.getJuicesByType("Juice");
+        //const frozenYogurts = await FrozenYogurt.getFrozenYogurtsByType("Frozen Yogurt");
+        //smoothies.forEach((s) => products.push(s));
+        //juices.forEach((j) => products.push(j));
+        //frozenYogurts.forEach((f) => products.push(f));
+        //return products;
 
-        this.#cartView.displayProducts(this.#products);
-    }
+        //this.#cartView.displayProducts(this.#products);
+    //}
 
     /**
      * Removes a product from the cart.
@@ -198,9 +200,9 @@ export default class CartController {
     /**
      * Displays the cart view so the user can continue shopping.
      */
-    showCartView() {
+    async showCartView() {
         this.#cartView = new CartView(this.#cart, this);
-        this.#cartView.displayProducts(this.#products);
+        this.#cartView.displayProducts(await Cart.loadProducts());
         this.#cartView.notify();
     }
 

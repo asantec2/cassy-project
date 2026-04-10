@@ -122,6 +122,7 @@ export default class training {
         };
 
         fs.writeFileSync(filePath, JSON.stringify(model, null, 2), "utf-8");
+        console.log("model saved to model.json successfully ");
     }
 
 }

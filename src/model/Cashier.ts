@@ -11,9 +11,7 @@ export default class Cashier {
 
     //constructor
     constructor(username: string, password: string) {
-        if (username.length === 0 || username.length >= 15) {
-            throw new InvalidUsernameException();
-        }
+
         if (/^[0-9]+$/.test(username)) {
             throw new InvalidNumericUsernameException();
         }
@@ -186,6 +184,9 @@ export default class Cashier {
 
         if (existingCashier !== null) {
             throw new DuplicateUserNameException();
+        }
+        if (username.length === 0 || username.length >= 15) {
+            throw new InvalidUsernameException();
         }
 
         if (password.length === 0) {

@@ -154,6 +154,34 @@ export default class Cart {
 
 
     }
+    getProductType(product:Product){
+        let type = "";
+
+        if (product instanceof Smoothie) {
+            type = "Smoothie";
+        } else if (product instanceof Juice) {
+            type = "Juice";
+        } else if (product instanceof FrozenYogurt) {
+            type = "Frozen Yogurt";
+        }
+      return type;
+
+    }
+    /**
+     * Load all products in store(database) to be displayed on screen for purchase
+     */
+    static async loadProducts():Promise<Array<Product>> {
+        let products = new Array<Product>();
+        const smoothies = await Smoothie.getSmoothiesByType("Smoothie");
+        const juices = await Juice.getJuicesByType("Juice");
+        const frozenYogurts = await FrozenYogurt.getFrozenYogurtsByType("Frozen Yogurt");
+        smoothies.forEach((s) => products.push(s));
+        juices.forEach((j) => products.push(j));
+        frozenYogurts.forEach((f) => products.push(f));
+        return products;
+
+        //this.#cartView.displayProducts(this.#products);
+    }
 
     /**
      * Get product from database based on the name of the product

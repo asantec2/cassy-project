@@ -21,8 +21,7 @@ import Juice from "../model/Juice.ts";
 import FrozenYogurt from "../model/FrozenYogurt.ts";
 import {
     InvalidPreviousProductException,
-    NoOutgoingTransitionException,
-    UntrainedMarkovModeException
+    NoOutgoingTransitionException
 } from "../model/MarkovModel.ts";
 
 export default class CartView {
@@ -271,10 +270,6 @@ export default class CartView {
                 this.#errorEl.textContent =
                     "Previous product added to cart cannot be used to auto shop. Please add another product to try again.";
                     this.#autoShopDialog.close();
-            } else if (e instanceof UntrainedMarkovModeException) {
-                this.#errorEl.textContent =
-                    "Model has not been trained. Please train the model and try again.";
-                this.#autoShopDialog.close();
             } else if (e instanceof NoOutgoingTransitionException) {
                 this.#errorEl.textContent =
                     "There are no products after the previous added product. Please add another product to try again.";
@@ -285,14 +280,14 @@ export default class CartView {
                 this.#autoShopDialog.querySelector("#auto-shop-error")!
                     .textContent = "The budget is invalid. Please enter a number greater than 0.";
             } else if (e instanceof LowBudgetException) {
-                    this.#errorEl.textContent = "The budget is too small to add the next product.";
+                    this.#errorEl.textContent = "The maximum number of eligible products has been added to cart.";
                 this.#autoShopDialog.close();
             } else if (e instanceof InvalidAutoShopCartException) {
                 this.#errorEl.textContent =
                     "There are no products in cart. Please add a product to try again.";
                      this.#autoShopDialog.close();
             } else if (e instanceof InvalidProductAdditionException) {
-                this.#errorEl.textContent = `Next product to be added to Cart is currently unavailable.Please try again next time.`;
+                this.#errorEl.textContent = `Next product to be added to cart is unavailable.Please try again next time.`;
                 this.#autoShopDialog.close();
             }
 
@@ -521,15 +516,7 @@ export default class CartView {
             div.className = "drink";
 
             const imageName = product.getName().replaceAll(" ", "");
-            let type = "";
-
-            if (product instanceof Smoothie) {
-                type = "Smoothie";
-            } else if (product instanceof Juice) {
-                type = "Juice";
-            } else if (product instanceof FrozenYogurt) {
-                type = "Frozen Yogurt";
-            }
+            let type = this.#cart.getProductType(product);
 
             div.innerHTML = `
             <img src="/images/${imageName}.png" alt="${type}" width="150">

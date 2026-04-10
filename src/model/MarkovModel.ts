@@ -3,7 +3,7 @@
  * to predict the next product based on previous purchases.
  *
  */
-import seedrandom from "seedrandom";
+import seedRandom from "seedrandom";
 import modelJson from "../../model.json?raw";
 
 
@@ -12,13 +12,14 @@ import modelJson from "../../model.json?raw";
  */
 export type MarkovModel = {
     numerators: number[][];
+
     denominators: number[];
     products: string[];
     labelIndexMap: Record<string, number>;
 };
 
 let model: MarkovModel;
-const rng = seedrandom("auto-shopper-seed");
+const rng = seedRandom("auto-shopper-seed");
 
 /**
  * Loads the Markov model from model.json.
@@ -44,6 +45,7 @@ export async function  getNextState( productName: string) :Promise<string> {
         throw new InvalidPreviousProductException();
     }
     const denominator = model.denominators[currentIndex];
+
     if(denominator === 0){
         throw new NoOutgoingTransitionException();
     }
@@ -68,6 +70,6 @@ export async function  getNextState( productName: string) :Promise<string> {
     // @ts-ignore
     return nextProduct;
 }
-export class UntrainedMarkovModeException extends Error{}
+
 export class InvalidPreviousProductException extends Error{}
 export class NoOutgoingTransitionException extends Error{}

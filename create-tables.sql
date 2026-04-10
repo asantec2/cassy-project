@@ -49,12 +49,12 @@ create table if not exists cartCoupon(
     on delete cascade
     );
 -- insert stock and price of products into store--
-insert into product(quantity,product_type, name, price) values(10, 'Juice','Orange Juice', 5)
-    on conflict (name) do nothing;
-insert into product(quantity,product_type, name, price) values(10, 'Smoothie','Strawberry Sunshine', 6)
-    on conflict (name) do nothing;
-insert into product(quantity,product_type, name, price) values(30, 'Frozen Yogurt','Vanilla Froyo', 6)
-    on conflict (name) do nothing;
+--insert into product(quantity,product_type, name, price) values(10, 'Juice','Orange Juice', 5)--
+  --  on conflict (name) do nothing;--
+--insert into product(quantity,product_type, name, price) values(10, 'Smoothie','Strawberry Sunshine', 6)--
+    --on conflict (name) do nothing;--
+--insert into product(quantity,product_type, name, price) values(30, 'Frozen Yogurt','Vanilla Froyo', 6)--
+    --on conflict (name) do nothing;--
 -- insert 10 new items--
 insert into product(quantity,product_type, name, price) values(10, 'Juice','Red Sunrise', 5)
     on conflict (name) do nothing;
